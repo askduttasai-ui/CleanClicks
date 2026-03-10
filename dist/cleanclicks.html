@@ -1874,10 +1874,14 @@ async function toggleAC() {
 async function setInterval_(seconds) {
   await api('/auto-clean/interval', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({seconds})});
   acInterval = seconds;
-  document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));
+  // Only target the auto-clean interval buttons — not shredder buttons
+  const btns = document.querySelectorAll('#intervalBtns .interval-btn');
+  btns.forEach(b=>b.classList.remove('active'));
   const intervals=[300,600,900,1800,3600];
   const idx=intervals.indexOf(seconds);
-  if (idx>=0) document.querySelectorAll('.interval-btn')[idx].classList.add('active');
+  if (idx>=0 && btns[idx]) btns[idx].classList.add('active');
+  // Reset countdown with new interval
+  startCountdown();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

@@ -43,7 +43,7 @@ is_running, guard_sock = already_running()
 
 if is_running:
     # Already running — just bring up the browser
-    webbrowser.open(str(BASE_DIR / 'cleanclicks.html'))
+    webbrowser.open('http://localhost:5050')
     sys.exit(0)
 
 # ── Wait for backend to be ready ─────────────────────────────────────────────
@@ -88,8 +88,8 @@ if __name__ == '__main__':
     # Wait until backend is accepting connections
     wait_for_backend(timeout=20)
 
-    # Open browser — user sees the app immediately
-    webbrowser.open(str(BASE_DIR / 'cleanclicks.html'))
+    # Open via localhost — keeps CORS secure
+    webbrowser.open('http://localhost:5050')
 
     # Keep process alive (backend runs as daemon thread)
     try:

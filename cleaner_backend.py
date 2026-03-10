@@ -28,10 +28,11 @@ import hmac
 
 app = Flask(__name__)
 # ── SECURITY: Only accept requests from localhost ─────────────────────────────
-CORS(app, origins=["http://localhost:5050","http://127.0.0.1:5050",
-                   "null","file://"],
+CORS(app,
+     origins=["http://localhost:5050","http://127.0.0.1:5050"],
      methods=["GET","POST","OPTIONS"],
-     allow_headers=["Content-Type","X-CleanClicks-Token"])
+     allow_headers=["Content-Type","X-CleanClicks-Token","Accept"],
+     supports_credentials=False)
 
 # Secret token — generated fresh each run, stored in memory only
 API_SECRET = secrets.token_hex(32)
@@ -1162,6 +1163,19 @@ def api_system_monitor():
 # ══════════════════════════════════════════════════════════════════════════════
 # STARTUP
 # ══════════════════════════════════════════════════════════════════════════════
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SERVE HTML — serve the frontend through Flask so origin is always localhost
+# ══════════════════════════════════════════════════════════════════════════════
+from flask import send_file, redirect
+
+@app.route("/")
+def serve_index():
+    """Serve cleanclicks.html through Flask — fixes CORS origin issues."""
+    html_path = BASE_DIR / "cleanclicks.html"
+    if html_path.exists():
+        return send_file(str(html_path))
+    return "<h1>CleanClicks</h1><p>cleanclicks.html not found in: " + str(BASE_DIR) + "</p>", 404
 
 if __name__ == "__main__":
     verify_own_integrity()
