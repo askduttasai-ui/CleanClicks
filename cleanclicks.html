@@ -1,0 +1,2491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanClicks — Your PC's Best Friend</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   RESET & ROOT VARIABLES
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#fff8f0;--bg2:#fff3e0;--bg3:#fffde7;
+  --sun:#fbbf24;--cloud:#fff;
+  --primary:#f97316;--primary-dark:#ea580c;
+  --accent:#f97316;--accent2:#fbbf24;
+  --danger:#ef4444;--success:#22c55e;--warn:#f59e0b;
+  --glass:rgba(255,255,255,0.72);--glass2:rgba(255,255,255,0.55);
+  --shadow:0 8px 32px rgba(59,130,246,.15);
+  --shadow2:0 2px 12px rgba(0,0,0,.08);
+  --radius:18px;--radius-sm:10px;
+  --font:'Quicksand',sans-serif;
+  --transition:0.25s cubic-bezier(.4,0,.2,1);
+}
+body{
+  font-family:var(--font);
+  min-height:100vh;
+  overflow-x:hidden;
+  background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg3) 100%);
+  position:relative;
+}
+
+/* ═══════════════════════════════════════════
+   SKY & CLOUD ANIMATIONS
+═══════════════════════════════════════════ */
+10%,80%{opacity:.7}90%{opacity:0}}
+
+/* Torn papers */
+.paper{
+  position:absolute;border-radius:2px;
+  animation:paper-fall linear infinite;
+  opacity:0;
+}
+@keyframes paper-fall{
+  0%{transform:translateY(-60px) rotate(0deg);opacity:0}
+  10%{opacity:.9}
+  80%{opacity:.9}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+/* Dust clouds */
+.dust{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(180,160,120,.5) 0%,transparent 70%);
+  animation:dust-puff ease-in-out infinite;
+  opacity:0;
+}
+@keyframes dust-puff{
+  0%,100%{transform:scale(0);opacity:0}
+  30%,70%{transform:scale(1);opacity:.6}
+}
+
+/* Trash items */
+.trash{
+  position:absolute;font-size:24px;
+  animation:trash-wobble ease-in-out infinite;
+  opacity:0;
+}
+@keyframes trash-wobble{
+  0%,100%{transform:rotate(-8deg) scale(0.8);opacity:0}
+  20%,80%{transform:rotate(8deg) scale(1);opacity:.8}
+  50%{transform:rotate(-5deg) scale(1.05);opacity:.9}
+}
+
+50%{transform:scale(1.2);opacity:1}}
+
+/* Speech bubble */
+.speech-bubble{
+  position:absolute;top:-50px;left:50%;transform:translateX(-50%);
+  background:white;border:3px solid #f97316;border-radius:16px;
+  padding:6px 12px;font-family:'Baloo 2',cursive;font-size:13px;
+  font-weight:800;color:#f97316;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(249,115,22,.3);
+  opacity:0;transition:opacity .4s ease;
+  pointer-events:none;
+}
+.speech-bubble::after{
+  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:#f97316;
+}
+.speech-bubble.show{opacity:1}
+
+
+
+.sweep-flash.active{opacity:1}50%{transform:scale(1);opacity:1}}
+
+/* Scene clean sweep */
+
+@keyframes sweep-flash{
+  0%,7%{left:-200px;opacity:0}
+  8%{opacity:.8}
+  85%{left:110vw;opacity:.8}
+  86%,100%{opacity:0}
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.app{position:relative;z-index:5;max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--glass);backdrop-filter:blur(20px);
+  border-radius:24px;padding:20px 28px;
+  box-shadow:var(--shadow);
+  border:1.5px solid rgba(255,255,255,.8);
+  margin-bottom:20px;flex-wrap:wrap;gap:12px;
+}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{
+  font-size:36px;
+  background:linear-gradient(135deg,var(--primary),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 8px rgba(59,130,246,.3));
+  animation:bounce-icon 2.5s ease-in-out infinite;
+}
+@keyframes bounce-icon{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+
+/* ════════════════════════════════════════════════════════
+   SCENE BACKGROUND — MESSY ROOM
+════════════════════════════════════════════════════════ */
+.scene-bg{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;overflow:hidden;
+}
+
+/* Cobwebs in corners */
+.cobweb{
+  position:absolute;opacity:0;
+  animation:cobweb-show 40s ease-in-out infinite;
+}
+.cobweb.cw1{top:0;left:0;}
+.cobweb.cw2{top:0;right:0;transform:scaleX(-1);}
+@keyframes cobweb-show{
+  0%,95%,100%{opacity:0}
+  5%,85%{opacity:.75}
+}
+
+/* Falling torn papers */
+.paper{
+  position:absolute;top:-80px;
+  border-radius:2px;opacity:0;
+  animation:paper-fall linear infinite;
+}
+@keyframes paper-fall{
+  0%{transform:translateY(0) rotate(0deg);opacity:0}
+  5%{opacity:.9}
+  90%{opacity:.9}
+  100%{transform:translateY(110vh) rotate(540deg);opacity:0}
+}
+
+/* Dust puffs on floor */
+.dust-puff{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(160,140,100,.55) 0%,transparent 70%);
+  animation:dust-rise ease-in-out infinite;
+  opacity:0;
+}
+@keyframes dust-rise{
+  0%,100%{transform:translateY(0) scale(.5);opacity:0}
+  40%,60%{transform:translateY(-12px) scale(1);opacity:.65}
+}
+
+/* Trash items on floor */
+.trash-item{
+  position:absolute;
+  animation:trash-idle ease-in-out infinite;
+  opacity:0;
+  display:inline-block;
+}
+@keyframes trash-idle{
+  0%,100%{transform:rotate(-6deg) scale(.9);opacity:0}
+  15%,85%{transform:rotate(6deg) scale(1);opacity:.85}
+  50%{transform:rotate(-3deg) scale(1.05);opacity:.9}
+}
+
+/* Poof effect when item is cleaned */
+@keyframes poof{
+  0%{transform:scale(1);opacity:1}
+  50%{transform:scale(2.5);opacity:.5}
+  100%{transform:scale(0);opacity:0}
+}
+.poofing{animation:poof .35s ease-out forwards!important;}
+
+/* ════════════════════════════════════════════════════════
+   SPARKY — FULLY VISIBLE, WALKS AROUND SCREEN
+════════════════════════════════════════════════════════ */
+#boboWrap{
+  position:fixed;
+  z-index:1;
+  opacity:0.92;
+  pointer-events:none;
+  width:100px;
+  height:150px;
+  bottom:auto;
+  will-change:transform,left,top;
+}
+
+/* Walking leg animation */
+.leg-l{transform-origin:50% 0;animation:leg-l .45s ease-in-out infinite alternate;}
+.leg-r{transform-origin:50% 0;animation:leg-r .45s ease-in-out infinite alternate;}
+@keyframes leg-l{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
+@keyframes leg-r{from{transform:rotate(20deg)}to{transform:rotate(-20deg)}}
+
+/* Arm swing */
+.arm-l{transform-origin:80% 20%;animation:arm-l .45s ease-in-out infinite alternate;}
+.arm-r{transform-origin:20% 20%;animation:arm-r .45s ease-in-out infinite alternate;}
+@keyframes arm-l{from{transform:rotate(-20deg)}to{transform:rotate(15deg)}}
+@keyframes arm-r{from{transform:rotate(15deg)}to{transform:rotate(-20deg)}}
+
+/* Mop sweep */
+.mop-grp{transform-origin:85% 15%;animation:mop-sweep .45s ease-in-out infinite alternate;}
+@keyframes mop-sweep{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+
+/* Body bob */
+.body-grp{animation:body-bob .45s ease-in-out infinite alternate;}
+@keyframes body-bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+
+/* Happy dance */
+.bobo-dance{animation:dance .25s ease-in-out infinite alternate!important;}
+@keyframes dance{from{transform:translateY(0) rotate(-5deg) scale(1.2)}to{transform:translateY(-14px) rotate(5deg) scale(1.2)}}
+
+/* Mop glow */
+.mop-glow{
+  position:absolute;
+  width:70px;height:14px;
+  background:linear-gradient(90deg,transparent,rgba(251,191,36,.8),rgba(249,115,22,.5));
+  border-radius:50%;filter:blur(5px);
+  animation:glow-pulse .4s ease-in-out infinite alternate;
+  bottom:28px;left:-52px;
+}
+@keyframes glow-pulse{from{opacity:.3;width:50px}to{opacity:1;width:75px}}
+
+/* Sparkles */
+.mop-spark{
+  position:absolute;font-size:12px;
+  animation:spark-pop .5s ease-in-out infinite;
+}
+.mop-spark:nth-child(1){bottom:38px;left:-55px;animation-delay:0s}
+.mop-spark:nth-child(2){bottom:55px;left:-35px;animation-delay:.18s}
+.mop-spark:nth-child(3){bottom:32px;left:-68px;animation-delay:.36s}
+@keyframes spark-pop{0%,100%{transform:scale(0);opacity:0}50%{transform:scale(1.3);opacity:1}}
+
+/* Speech bubble */
+#boboBubble{
+  position:absolute;
+  top:-52px;left:50%;
+  transform:translateX(-50%);
+  background:white;
+  border:3px solid #f97316;
+  border-radius:14px;
+  padding:5px 12px;
+  font-family:'Baloo 2',cursive;
+  font-size:13px;font-weight:800;
+  color:#ea580c;
+  white-space:nowrap;
+  box-shadow:0 4px 16px rgba(249,115,22,.35);
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+}
+#boboBubble::after{
+  content:'';
+  position:absolute;
+  bottom:-10px;left:50%;
+  transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:#f97316;
+}
+#boboBubble.show{opacity:1!important;}
+
+/* Big clean flash */
+#cleanFlash{
+  position:fixed;inset:0;z-index:9;
+  background:radial-gradient(ellipse at center,rgba(255,237,213,.92) 0%,transparent 75%);
+  pointer-events:none;opacity:0;
+  transition:opacity .4s ease;
+}
+#cleanFlash.active{opacity:1}
+.logo-text h1{font-family:'Baloo 2',cursive;font-size:28px;color:var(--primary);letter-spacing:.5px;line-height:1}
+.logo-text span{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.last-clean-badge{
+  background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+  border:1px solid #6ee7b7;
+  border-radius:20px;padding:5px 14px;
+  font-size:12px;font-weight:700;color:#065f46;
+  display:none;
+}
+.btn-header{
+  background:var(--glass2);backdrop-filter:blur(10px);
+  border:1.5px solid rgba(59,130,246,.3);border-radius:20px;
+  padding:8px 16px;font-size:13px;font-weight:700;
+  color:var(--primary);cursor:pointer;transition:var(--transition);
+  display:flex;align-items:center;gap:6px;
+}
+.btn-header:hover{background:var(--primary);color:white;transform:translateY(-1px)}
+.btn-dark-mode{font-size:18px;padding:8px 12px}
+
+/* ═══════════════════════════════════════════
+   DRIVE SELECTOR
+═══════════════════════════════════════════ */
+.drives-row{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;
+}
+.drive-btn{
+  background:var(--glass);backdrop-filter:blur(12px);
+  border:2px solid transparent;border-radius:16px;
+  padding:10px 18px;cursor:pointer;transition:var(--transition);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  min-width:90px;
+}
+.drive-btn.active{border-color:#f97316;background:rgba(59,130,246,.12)}
+.drive-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.drive-btn .drive-letter{font-size:20px;font-weight:800;color:var(--primary)}
+.drive-btn .drive-bar-wrap{width:64px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.drive-btn .drive-bar{height:100%;border-radius:3px;transition:width .6s ease}
+.drive-btn .drive-info{font-size:11px;color:#64748b;font-weight:600}
+
+/* ═══════════════════════════════════════════
+   DISK STATS GRID
+═══════════════════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{
+  background:var(--glass);backdrop-filter:blur(16px);
+  border-radius:var(--radius);padding:18px 20px;
+  box-shadow:var(--shadow2);
+  border:1.5px solid rgba(255,255,255,.8);
+  display:flex;align-items:center;gap:14px;
+}
+.stat-icon{font-size:32px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.1))}
+.stat-label{font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.stat-value{font-size:22px;font-weight:800;color:#1e293b}
+.stat-sub{font-size:11px;color:#94a3b8;margin-top:1px}
+
+/* ═══════════════════════════════════════════
+   HEALTH SCORE
+═══════════════════════════════════════════ */
+.health-banner{
+  background:var(--glass);backdrop-filter:blur(16px);
+  border-radius:var(--radius);padding:20px 24px;
+  box-shadow:var(--shadow2);border:1.5px solid rgba(255,255,255,.8);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:20px;margin-bottom:20px;flex-wrap:wrap;
+}
+.health-grade{
+  display:flex;align-items:center;gap:16px;
+}
+.grade-circle{
+  width:72px;height:72px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-weight:900;font-family:'Baloo 2',cursive;
+  transition:all .5s ease;box-shadow:0 4px 16px rgba(0,0,0,.15);
+}
+.grade-circle .grade-letter{font-size:28px;line-height:1;color:white}
+.grade-circle .grade-score{font-size:11px;color:rgba(255,255,255,.85);font-family:var(--font);font-weight:700}
+.health-info h3{font-size:18px;font-weight:800;color:#1e293b}
+.health-info p{font-size:13px;color:#64748b;margin-top:2px}
+.health-issues{flex:1;min-width:200px}
+.health-issue{font-size:12px;color:#dc2626;font-weight:600;margin-bottom:3px}
+.health-tip{font-size:12px;color:#059669;font-weight:600;margin-bottom:3px}
+
+/* ═══════════════════════════════════════════
+   LOW DISK ALERT
+═══════════════════════════════════════════ */
+.alert-banner{
+  background:linear-gradient(135deg,#fef2f2,#fee2e2);
+  border:2px solid #fca5a5;border-radius:var(--radius);
+  padding:16px 20px;margin-bottom:20px;display:none;
+}
+.alert-banner.show{display:block;animation:shake-alert .4s ease}
+@keyframes shake-alert{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.alert-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.alert-siren{font-size:24px;animation:siren 1s ease-in-out infinite}
+@keyframes siren{0%,100%{opacity:1}50%{opacity:.3}}
+.alert-title{font-size:16px;font-weight:800;color:#dc2626}
+.alert-drive-tabs{display:flex;gap:8px;margin-bottom:14px}
+.alert-tab{
+  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;
+  cursor:pointer;border:2px solid transparent;transition:var(--transition);
+  background:rgba(239,68,68,.1);color:#dc2626;
+}
+.alert-tab.active{background:#dc2626;color:white}
+.sugg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.sugg-card{
+  background:white;border-radius:12px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.sugg-left{display:flex;align-items:center;gap:10px}
+.sugg-icon{font-size:22px}
+.sugg-name{font-size:13px;font-weight:700;color:#1e293b}
+.sugg-reason{font-size:11px;color:#64748b;margin-top:1px}
+.sugg-right{display:flex;align-items:center;gap:8px}
+.sugg-size{font-size:12px;font-weight:700;color:#374151;text-align:right}
+.sugg-files{font-size:10px;color:#9ca3af;text-align:right}
+.pill{border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.pill-red{background:#fee2e2;color:#dc2626}
+.pill-orange{background:#ffedd5;color:#ea580c}
+.pill-blue{background:#dbeafe;color:#1d4ed8}
+.btn-burn-sm{
+  background:linear-gradient(135deg,#ef4444,#dc2626);color:white;
+  border:none;border-radius:8px;padding:6px 12px;font-size:12px;
+  font-weight:700;cursor:pointer;transition:var(--transition);
+}
+.btn-burn-sm:hover{transform:scale(1.05)}
+.alert-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ═══════════════════════════════════════════
+   FREED BANNER
+═══════════════════════════════════════════ */
+.freed-banner{
+  background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+  border:2px solid #6ee7b7;border-radius:var(--radius);
+  padding:14px 20px;margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+  animation:slide-in .4s ease;
+}
+@keyframes slide-in{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.freed-total{font-size:20px;font-weight:800;color:#065f46}
+.freed-label{font-size:13px;color:#047857;font-weight:600}
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+.tabs-row{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;
+  background:var(--glass);backdrop-filter:blur(12px);
+  border-radius:16px;padding:8px;
+  box-shadow:var(--shadow2);
+}
+.tab-btn{
+  flex:1;min-width:90px;padding:10px 14px;border:none;
+  border-radius:10px;font-size:13px;font-weight:700;
+  font-family:var(--font);cursor:pointer;transition:var(--transition);
+  color:#64748b;background:transparent;display:flex;align-items:center;
+  justify-content:center;gap:6px;white-space:nowrap;
+}
+.tab-btn.active{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;box-shadow:0 4px 12px rgba(249,115,22,.35);
+}
+.tab-btn:hover:not(.active){background:rgba(59,130,246,.08);color:var(--primary)}
+
+/* ═══════════════════════════════════════════
+   PANELS
+═══════════════════════════════════════════ */
+.tab-panel{display:none;animation:fade-up .3s ease}
+.tab-panel.active{display:block}
+@keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.panel-card{
+  background:var(--glass);backdrop-filter:blur(16px);
+  border-radius:var(--radius);padding:24px;
+  box-shadow:var(--shadow);border:1.5px solid rgba(255,255,255,.8);
+  margin-bottom:16px;
+}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.panel-title{font-size:18px;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:8px}
+.panel-subtitle{font-size:12px;color:#64748b;font-weight:600;margin-top:2px}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn{
+  border:none;border-radius:12px;padding:10px 22px;
+  font-size:14px;font-weight:700;font-family:var(--font);
+  cursor:pointer;transition:var(--transition);display:inline-flex;
+  align-items:center;gap:8px;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;box-shadow:0 4px 14px rgba(249,115,22,.35);
+}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(249,115,22,.45)}
+.btn-danger{
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:white;box-shadow:0 4px 14px rgba(239,68,68,.35);
+}
+.btn-danger:hover{box-shadow:0 6px 20px rgba(239,68,68,.45)}
+.btn-success{background:linear-gradient(135deg,#22c55e,#16a34a);color:white}
+.btn-ghost{background:rgba(59,130,246,.08);color:var(--primary);border:1.5px solid rgba(59,130,246,.2)}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:9px}
+.btn-disabled{opacity:.5;pointer-events:none}
+
+/* ═══════════════════════════════════════════
+   FILE LISTS
+═══════════════════════════════════════════ */
+.file-controls{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.select-all-wrap{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#374151;cursor:pointer}
+.file-count-badge{background:var(--primary);color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700}
+
+.file-list{max-height:360px;overflow-y:auto;border-radius:12px;border:1.5px solid rgba(59,130,246,.15)}
+.file-list::-webkit-scrollbar{width:6px}
+.file-list::-webkit-scrollbar-track{background:#f1f5f9;border-radius:3px}
+.file-list::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:3px}
+
+.file-item{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid rgba(0,0,0,.04);background:white;
+  transition:background .15s;
+}
+.file-item:last-child{border-bottom:none}
+.file-item:hover{background:#f8faff}
+.file-item input[type=checkbox]{width:16px;height:16px;accent-color:#f97316;cursor:pointer}
+.file-name{flex:1;font-size:12px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-path{font-size:10px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}
+.file-size{font-size:12px;font-weight:700;color:#64748b;white-space:nowrap}
+
+/* ═══════════════════════════════════════════
+   DUPLICATE GROUPS
+═══════════════════════════════════════════ */
+.dup-group{
+  background:white;border-radius:12px;margin-bottom:10px;
+  overflow:hidden;box-shadow:var(--shadow2);
+}
+.dup-group-header{
+  background:linear-gradient(90deg,#f0f9ff,#e0f2fe);
+  padding:10px 16px;display:flex;align-items:center;gap:10px;
+}
+.dup-files{padding:4px 0}
+
+/* ═══════════════════════════════════════════
+   STARTUP MANAGER
+═══════════════════════════════════════════ */
+.startup-item{
+  background:white;border-radius:12px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;box-shadow:var(--shadow2);gap:12px;
+}
+.startup-name{font-size:14px;font-weight:700;color:#1e293b}
+.startup-cmd{font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:400px}
+.toggle-switch{
+  position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0;
+}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:#cbd5e1;border-radius:12px;transition:.3s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;width:20px;height:20px;
+  left:2px;bottom:2px;background:white;border-radius:50%;transition:.3s;
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
+.toggle-switch input:checked + .toggle-slider{background:var(--success)}
+.toggle-switch input:checked + .toggle-slider::before{transform:translateX(20px)}
+
+/* ═══════════════════════════════════════════
+   LARGE FILE FINDER
+═══════════════════════════════════════════ */
+.lf-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.lf-input{
+  border:1.5px solid rgba(59,130,246,.25);border-radius:10px;
+  padding:8px 14px;font-size:13px;font-family:var(--font);
+  background:rgba(255,255,255,.8);color:#1e293b;width:100px;
+}
+.lf-input:focus{outline:none;border-color:#f97316}
+
+/* ═══════════════════════════════════════════
+   PRIVACY CLEANER
+═══════════════════════════════════════════ */
+.privacy-item{
+  background:white;border-radius:12px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;box-shadow:var(--shadow2);
+}
+.privacy-check{display:flex;align-items:center;gap:10px}
+.privacy-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent2)}
+.privacy-label{font-size:14px;font-weight:700;color:#1e293b}
+.privacy-meta{font-size:11px;color:#94a3b8;margin-top:1px}
+
+/* ═══════════════════════════════════════════
+   AUTO-CLEAN TAB
+═══════════════════════════════════════════ */
+.ac-status-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.ac-stat{
+  background:white;border-radius:12px;padding:16px;text-align:center;
+  box-shadow:var(--shadow2);
+}
+.ac-stat .ac-val{font-size:24px;font-weight:800;color:var(--primary)}
+.ac-stat .ac-lbl{font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;margin-top:2px}
+
+.ac-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.interval-btns{display:flex;gap:6px;flex-wrap:wrap}
+.interval-btn{
+  background:rgba(59,130,246,.08);color:var(--primary);
+  border:1.5px solid rgba(59,130,246,.2);border-radius:8px;
+  padding:6px 12px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:var(--transition);font-family:var(--font);
+}
+.interval-btn.active{background:var(--primary);color:white;border-color:#f97316}
+.interval-btn:hover:not(.active){background:rgba(59,130,246,.15)}
+
+.countdown-ring{
+  width:80px;height:80px;margin:0 auto 12px;position:relative;
+}
+.countdown-ring svg{transform:rotate(-90deg)}
+.countdown-ring .ring-track{fill:none;stroke:#e2e8f0;stroke-width:6}
+.countdown-ring .ring-prog{
+  fill:none;stroke:var(--primary);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:220;stroke-dashoffset:0;transition:stroke-dashoffset .5s linear;
+}
+.countdown-text{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:13px;font-weight:800;color:var(--primary);text-align:center;
+}
+.ac-log{max-height:260px;overflow-y:auto;border-radius:12px;background:white;padding:4px;box-shadow:var(--shadow2)}
+.ac-log-entry{
+  padding:10px 14px;border-bottom:1px solid #f1f5f9;
+  display:flex;align-items:center;gap:10px;
+}
+.ac-log-entry:last-child{border-bottom:none}
+.ac-log-icon{font-size:18px}
+.ac-log-info{flex:1}
+.ac-log-freed{font-size:13px;font-weight:800;color:#22c55e}
+.ac-log-cats{font-size:11px;color:#64748b;margin-top:1px}
+.ac-log-time{font-size:10px;color:#94a3b8;white-space:nowrap}
+
+/* ═══════════════════════════════════════════
+   DISK TREND CHART
+═══════════════════════════════════════════ */
+.trend-wrap{background:white;border-radius:12px;padding:16px;margin-top:14px;box-shadow:var(--shadow2)}
+.trend-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.trend-title{font-size:14px;font-weight:800;color:#1e293b}
+.trend-btns{display:flex;gap:4px}
+.trend-btn{
+  background:#f1f5f9;color:#64748b;border:none;border-radius:6px;
+  padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;
+  transition:var(--transition);font-family:var(--font);
+}
+.trend-btn.active{background:var(--primary);color:white}
+canvas#trendChart{width:100%;height:140px;display:block}
+
+/* ═══════════════════════════════════════════
+   LOADING & EMPTY STATES
+═══════════════════════════════════════════ */
+.loading{text-align:center;padding:32px;color:#64748b;font-weight:600}
+.spinner{
+  width:40px;height:40px;border:4px solid rgba(59,130,246,.2);
+  border-top-color:var(--primary);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 12px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px 20px;color:#94a3b8}
+.empty-icon{font-size:48px;margin-bottom:10px}
+.empty-text{font-size:15px;font-weight:700;color:#64748b}
+.empty-sub{font-size:12px;margin-top:4px}
+
+/* ═══════════════════════════════════════════
+   BURN OVERLAY ANIMATION
+═══════════════════════════════════════════ */
+.burn-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.7);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:none;
+}
+.burn-overlay.active{display:flex;animation:fade-in .3s ease}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.burn-stage{
+  background:white;border-radius:24px;padding:40px;
+  text-align:center;max-width:420px;width:90%;
+}
+.burn-title{font-family:'Baloo 2',cursive;font-size:28px;color:#dc2626;margin-bottom:6px}
+.burn-subtitle{font-size:14px;color:#64748b;margin-bottom:24px}
+
+/* Digger character */
+.digger-scene{width:200px;height:120px;margin:0 auto 20px;position:relative}
+.worker-body{position:absolute;bottom:30px;left:60px}
+.worker-head{
+  width:28px;height:28px;background:#fbbf24;border-radius:50%;
+  position:relative;margin:0 auto 2px;
+}
+.worker-hat{
+  width:34px;height:12px;background:#dc2626;border-radius:4px 4px 0 0;
+  position:absolute;top:-10px;left:-3px;
+}
+.worker-torso{width:26px;height:32px;background:#3b82f6;border-radius:4px;margin:0 auto}
+.worker-arm-l,.worker-arm-r{
+  width:10px;height:24px;background:#3b82f6;border-radius:5px;
+  position:absolute;top:34px;
+}
+.worker-arm-l{left:10px;transform-origin:top center;animation:dig-l 0.8s ease-in-out infinite}
+.worker-arm-r{right:10px;transform-origin:top center;animation:dig-r 0.8s ease-in-out infinite}
+@keyframes dig-l{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(-70deg)}}
+@keyframes dig-r{0%,100%{transform:rotate(20deg)}50%{transform:rotate(70deg)}}
+.worker-leg-l,.worker-leg-r{
+  width:10px;height:22px;background:#1e40af;border-radius:5px;
+  position:absolute;bottom:0;
+}
+.worker-leg-l{left:3px;animation:leg-l 0.8s ease-in-out infinite}
+.worker-leg-r{right:3px;animation:leg-r 0.8s ease-in-out infinite}
+@keyframes leg-l{0%,100%{transform:rotate(5deg)}50%{transform:rotate(-5deg)}}
+@keyframes leg-r{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.shovel{
+  position:absolute;bottom:18px;left:24px;width:44px;height:10px;
+  background:#6b7280;border-radius:3px;transform-origin:right center;
+  animation:shovel-anim 0.8s ease-in-out infinite;
+}
+.shovel::after{
+  content:'';position:absolute;left:-12px;top:-6px;
+  width:14px;height:22px;background:#94a3b8;border-radius:3px;
+}
+@keyframes shovel-anim{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+
+/* Firepit */
+.firepit{position:absolute;bottom:0;right:20px;text-align:center}
+.fire-emoji{font-size:36px;animation:fire-flicker 0.5s ease-in-out infinite alternate}
+@keyframes fire-flicker{0%{transform:scaleY(1) translateY(0)}100%{transform:scaleY(1.15) translateY(-3px)}}
+.smoke-particle{
+  position:absolute;width:10px;height:10px;background:rgba(100,116,139,.4);
+  border-radius:50%;animation:smoke-rise 2s ease-out infinite;
+}
+.smoke-particle:nth-child(1){left:10px;animation-delay:0s}
+.smoke-particle:nth-child(2){left:22px;animation-delay:0.5s}
+.smoke-particle:nth-child(3){left:34px;animation-delay:1s}
+@keyframes smoke-rise{0%{opacity:.6;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(2)}}
+
+/* File particles flying */
+.file-particle{
+  position:absolute;font-size:16px;animation:fly-file 1.2s ease-in forwards;
+}
+@keyframes fly-file{
+  0%{transform:translate(0,0) rotate(0deg);opacity:1}
+  100%{transform:translate(80px,-30px) rotate(180deg) scale(0.3);opacity:0}
+}
+.burn-progress-wrap{width:100%;background:#f1f5f9;border-radius:10px;height:12px;margin:16px 0 8px;overflow:hidden}
+.burn-progress-bar{
+  height:100%;background:linear-gradient(90deg,#ef4444,#f97316);
+  border-radius:10px;transition:width .3s ease;width:0%;
+}
+.burn-progress-text{font-size:13px;font-weight:700;color:#64748b}
+.burn-result{font-size:18px;font-weight:800;color:#22c55e;margin-top:10px;display:none}
+
+/* ═══════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════ */
+body.dark{
+  background:linear-gradient(180deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);
+}
+body.dark .scene-bg{opacity:.4}
+body.dark .bobo-wrap{opacity:.6}
+body.dark .header,body.dark .panel-card,body.dark .ac-stat,
+body.dark .stat-card,body.dark .health-banner,body.dark .tabs-row,
+body.dark .drive-btn{
+  background:rgba(30,41,59,.85);border-color:rgba(255,255,255,.08);color:#e2e8f0;
+}
+body.dark .file-item,body.dark .startup-item,body.dark .privacy-item,
+body.dark .dup-group,body.dark .sugg-card,body.dark .trend-wrap,
+body.dark .ac-log{background:#1e293b;color:#e2e8f0}
+body.dark .stat-value,body.dark .panel-title,body.dark .health-info h3,
+body.dark .startup-name,body.dark .privacy-label,body.dark .file-name,
+body.dark .trend-title{color:#f1f5f9}
+body.dark .file-path,body.dark .startup-cmd{color:#64748b}
+body.dark .tab-btn{color:#94a3b8}
+body.dark .tab-btn.active{color:white}
+body.dark .lf-input{background:rgba(30,41,59,.8);color:#f1f5f9;border-color:rgba(255,255,255,.1)}
+body.dark .dup-group-header{background:linear-gradient(90deg,#1e3a5f,#162d4f)}
+body.dark .alert-banner{background:rgba(127,29,29,.3);border-color:#991b1b}
+body.dark .logo-text h3{color:#93c5fd}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media(max-width:640px){
+  .header{padding:14px 16px}
+  .logo-text h1{font-size:22px}
+  .tabs-row{gap:4px;padding:6px}
+  .tab-btn{min-width:70px;font-size:11px;padding:8px 6px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Sky Background -->
+<!-- Clean Flash -->
+<div id="cleanFlash"></div>
+
+<!-- Messy Background Scene -->
+<div class="scene-bg" id="sceneBg">
+  <!-- Cobweb top-left -->
+  <div class="cobweb cw1">
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <g stroke="#b0b0b0" stroke-width="0.9" fill="none" opacity="0.75">
+        <line x1="0" y1="0" x2="140" y2="90"/>
+        <line x1="0" y1="0" x2="90" y2="140"/>
+        <line x1="0" y1="0" x2="50" y2="140"/>
+        <line x1="0" y1="0" x2="0" y2="140"/>
+        <line x1="0" y1="0" x2="140" y2="40"/>
+        <path d="M12,40 Q50,32 85,38"/>
+        <path d="M7,72 Q45,62 80,70"/>
+        <path d="M4,100 Q38,90 68,98"/>
+        <path d="M2,120 Q30,112 55,118"/>
+        <circle cx="12" cy="40" r="2" fill="#b0b0b0"/>
+        <circle cx="7"  cy="72" r="2" fill="#b0b0b0"/>
+        <circle cx="4"  cy="100" r="2" fill="#b0b0b0"/>
+      </g>
+    </svg>
+  </div>
+  <!-- Cobweb top-right -->
+  <div class="cobweb cw2">
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <g stroke="#b8b8b8" stroke-width="0.9" fill="none" opacity="0.65">
+        <line x1="0" y1="0" x2="140" y2="90"/>
+        <line x1="0" y1="0" x2="90" y2="140"/>
+        <line x1="0" y1="0" x2="40" y2="140"/>
+        <line x1="0" y1="0" x2="0" y2="140"/>
+        <path d="M10,38 Q48,30 80,36"/>
+        <path d="M6,68 Q40,58 75,66"/>
+        <path d="M3,95 Q35,86 64,93"/>
+        <circle cx="10" cy="38" r="2" fill="#b8b8b8"/>
+        <circle cx="6"  cy="68" r="2" fill="#b8b8b8"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- BoBo Character -->
+<div id="boboWrap">
+  <div id="boboBubble">All clean! ✨</div>
+  <div class="mop-glow"></div>
+  <span class="mop-spark">✨</span>
+  <span class="mop-spark">⭐</span>
+  <span class="mop-spark">✨</span>
+  <svg viewBox="0 0 160 180" width="160" height="180" xmlns="http://www.w3.org/2000/svg">
+    <!-- Shadow -->
+    <ellipse cx="72" cy="176" rx="38" ry="6" fill="rgba(0,0,0,.12)"/>
+    <g class="body-grp">
+
+      <!-- ══ VACUUM CLEANER (yellow, on floor, BoBo holds hose) ══ -->
+      <!-- Vacuum body -->
+      <rect x="90" y="118" width="62" height="36" rx="14" fill="#fbbf24"/>
+      <rect x="92" y="120" width="58" height="32" rx="12" fill="#f59e0b"/>
+      <!-- Vacuum shine -->
+      <ellipse cx="110" cy="126" rx="12" ry="5" fill="rgba(255,255,255,.25)"/>
+      <!-- Control panel -->
+      <rect x="108" y="124" width="28" height="18" rx="5" fill="#1e40af" opacity=".85"/>
+      <!-- Buttons -->
+      <circle cx="116" cy="130" r="4" fill="#ef4444"/><circle cx="116" cy="130" r="2.2" fill="#fca5a5"/>
+      <circle cx="126" cy="130" r="4" fill="#22c55e"/><circle cx="126" cy="130" r="2.2" fill="#86efac"/>
+      <circle cx="121" cy="138" r="4" fill="#3b82f6"/><circle cx="121" cy="138" r="2.2" fill="#93c5fd"/>
+      <!-- Wheels -->
+      <circle cx="102" cy="154" r="9" fill="#1e293b"/><circle cx="102" cy="154" r="5" fill="#374151"/><circle cx="102" cy="154" r="2" fill="#9ca3af"/>
+      <circle cx="136" cy="154" r="9" fill="#1e293b"/><circle cx="136" cy="154" r="5" fill="#374151"/><circle cx="136" cy="154" r="2" fill="#9ca3af"/>
+      <!-- Vacuum brand label -->
+      <rect x="96" y="140" width="38" height="8" rx="3" fill="rgba(0,0,0,.2)"/>
+      <text x="115" y="147" text-anchor="middle" font-family="Baloo 2,cursive" font-size="5" font-weight="800" fill="#fef3c7">CLEAN-O</text>
+
+      <!-- HOSE from vacuum to BoBo hand — curved path -->
+      <path d="M94,130 Q70,120 52,128" stroke="#6b7280" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M94,130 Q70,120 52,128" stroke="#9ca3af" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-dasharray="5,4"/>
+
+      <!-- SUCTION HEAD at end of hose -->
+      <rect x="26" y="122" width="28" height="12" rx="5" fill="#374151"/>
+      <rect x="23" y="127" width="34" height="6" rx="3" fill="#1e293b"/>
+      <!-- Suction glow/air effect -->
+      <ellipse cx="40" cy="133" rx="16" ry="6" fill="rgba(59,130,246,.2)"/>
+      <g opacity=".5">
+        <line x1="30" y1="140" x2="28" y2="150" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="38" y1="140" x2="36" y2="152" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="46" y1="140" x2="44" y2="150" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- ══ LEGS ══ -->
+      <g class="leg-l">
+        <rect x="44" y="126" width="16" height="36" rx="9" fill="#e2e8f0"/>
+        <rect x="45" y="127" width="7" height="18" rx="3" fill="#cbd5e1"/>
+        <rect x="38" y="156" width="24" height="10" rx="6" fill="#94a3b8"/>
+        <rect x="38" y="156" width="12" height="6" rx="3" fill="#cbd5e1" opacity=".5"/>
+      </g>
+      <g class="leg-r">
+        <rect x="66" y="126" width="16" height="36" rx="9" fill="#e2e8f0"/>
+        <rect x="67" y="127" width="7" height="18" rx="3" fill="#cbd5e1"/>
+        <rect x="60" y="156" width="24" height="10" rx="6" fill="#94a3b8"/>
+        <rect x="60" y="156" width="12" height="6" rx="3" fill="#cbd5e1" opacity=".5"/>
+      </g>
+
+      <!-- ══ BODY ══ -->
+      <rect x="30" y="72" width="68" height="58" rx="22" fill="white"/>
+      <rect x="30" y="72" width="68" height="58" rx="22" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+      <!-- Body sheen -->
+      <ellipse cx="50" cy="80" rx="18" ry="8" fill="rgba(255,255,255,.6)"/>
+      <!-- Chest panel -->
+      <rect x="40" y="86" width="48" height="32" rx="10" fill="#eff6ff"/>
+      <rect x="40" y="86" width="48" height="32" rx="10" fill="none" stroke="#bfdbfe" stroke-width="1.5"/>
+      <!-- Status lights row -->
+      <circle cx="52" cy="96" r="5" fill="#22c55e"/><circle cx="52" cy="96" r="3" fill="#86efac"/>
+      <circle cx="64" cy="96" r="5" fill="#f97316"/><circle cx="64" cy="96" r="3" fill="#fdba74"/>
+      <circle cx="76" cy="96" r="5" fill="#3b82f6"/><circle cx="76" cy="96" r="3" fill="#93c5fd"/>
+      <!-- CleanClicks label on chest -->
+      <rect x="40" y="106" width="48" height="10" rx="4" fill="#dbeafe"/>
+      <text x="64" y="114" text-anchor="middle" font-family="Baloo 2,cursive" font-size="6" font-weight="900" fill="#1e40af">CleanClicks</text>
+
+      <!-- ══ LEFT ARM — bent forward holding hose ══ -->
+      <g class="arm-l">
+        <!-- Upper arm -->
+        <rect x="12" y="76" width="22" height="13" rx="7" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+        <!-- Forearm bent down -->
+        <rect x="10" y="86" width="13" height="22" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+        <!-- Hand gripping hose -->
+        <circle cx="16" cy="110" r="9" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+        <circle cx="16" cy="110" r="6" fill="#f1f5f9"/>
+        <!-- Grip knuckle lines -->
+        <line x1="12" y1="107" x2="20" y2="107" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="12" y1="111" x2="20" y2="111" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- ══ RIGHT ARM — pointing forward ══ -->
+      <g class="arm-r">
+        <rect x="94" y="76" width="22" height="13" rx="7" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+        <rect x="100" y="86" width="13" height="22" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+        <circle cx="109" cy="110" r="9" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+        <circle cx="109" cy="110" r="6" fill="#f1f5f9"/>
+      </g>
+
+      <!-- ══ NECK ══ -->
+      <rect x="54" y="58" width="18" height="16" rx="6" fill="#cbd5e1"/>
+      <rect x="57" y="60" width="12" height="12" rx="4" fill="#e2e8f0"/>
+      <!-- Neck bolts -->
+      <circle cx="56" cy="64" r="2" fill="#94a3b8"/>
+      <circle cx="70" cy="64" r="2" fill="#94a3b8"/>
+
+      <!-- ══ HEAD (round, white, cute robot) ══ -->
+      <circle cx="63" cy="36" r="34" fill="white"/>
+      <circle cx="63" cy="36" r="34" fill="none" stroke="#e2e8f0" stroke-width="2.5"/>
+      <!-- Head highlight -->
+      <ellipse cx="48" cy="18" rx="14" ry="9" fill="rgba(255,255,255,.65)"/>
+
+      <!-- ══ ANTENNA ══ -->
+      <rect x="61" y="2" width="4" height="14" rx="2" fill="#94a3b8"/>
+      <circle cx="63" cy="2" r="6" fill="#f97316"/>
+      <circle cx="63" cy="2" r="4" fill="#fbbf24"/>
+      <circle cx="63" cy="2" r="8" fill="rgba(249,115,22,.18)"/>
+      <!-- Antenna pulse rings -->
+      <circle cx="63" cy="2" r="11" fill="none" stroke="rgba(249,115,22,.12)" stroke-width="2"/>
+
+      <!-- ══ EAR PANELS ══ -->
+      <rect x="26" y="26" width="10" height="20" rx="5" fill="#e2e8f0"/>
+      <rect x="27" y="30" width="8" height="12" rx="3" fill="#3b82f6" opacity=".55"/>
+      <rect x="90" y="26" width="10" height="20" rx="5" fill="#e2e8f0"/>
+      <rect x="91" y="30" width="8" height="12" rx="3" fill="#3b82f6" opacity=".55"/>
+
+      <!-- ══ EYES — big blue screens like reference ══ -->
+      <!-- Eye frames -->
+      <rect x="36" y="22" width="24" height="22" rx="10" fill="#0f172a"/>
+      <rect x="66" y="22" width="24" height="22" rx="10" fill="#0f172a"/>
+      <!-- Eye screens -->
+      <rect x="38" y="24" width="20" height="18" rx="8" fill="#0ea5e9"/>
+      <rect x="68" y="24" width="20" height="18" rx="8" fill="#0ea5e9"/>
+      <!-- Screen glow -->
+      <rect x="38" y="24" width="20" height="18" rx="8" fill="#38bdf8" opacity=".6"/>
+      <!-- Pupils -->
+      <circle cx="48" cy="33" r="6" fill="#0c4a6e"/>
+      <circle cx="78" cy="33" r="6" fill="#0c4a6e"/>
+      <!-- Big shine spots — exactly like reference image -->
+      <circle cx="44" cy="28" r="3.5" fill="white"/>
+      <circle cx="74" cy="28" r="3.5" fill="white"/>
+      <circle cx="52" cy="36" r="1.5" fill="rgba(255,255,255,.55)"/>
+      <circle cx="82" cy="36" r="1.5" fill="rgba(255,255,255,.55)"/>
+
+      <!-- ══ MOUTH (happy curve) ══ -->
+      <path d="M50,54 Q63,65 76,54" stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="50" cy="54" r="2.5" fill="#94a3b8"/>
+      <circle cx="76" cy="54" r="2.5" fill="#94a3b8"/>
+
+      <!-- ══ CHEEKS ══ -->
+      <ellipse cx="34" cy="46" rx="8" ry="5" fill="rgba(249,115,22,.2)"/>
+      <ellipse cx="92" cy="46" rx="8" ry="5" fill="rgba(249,115,22,.2)"/>
+    </g>
+  </svg>
+</div>
+
+<!-- Burn Overlay -->
+<div class="burn-overlay" id="burnOverlay">
+  <div class="burn-stage">
+    <div class="burn-title">🔥 Burning Files!</div>
+    <div class="burn-subtitle" id="burnSubtitle">Incinerating selected files...</div>
+    <div class="digger-scene">
+      <div class="worker-body">
+        <div class="worker-head"><div class="worker-hat"></div></div>
+        <div class="worker-torso"></div>
+        <div class="worker-arm-l"></div>
+        <div class="worker-arm-r"></div>
+        <div class="worker-leg-l"></div>
+        <div class="worker-leg-r"></div>
+      </div>
+      <div class="shovel"></div>
+      <div class="firepit">
+        <div class="smoke-particle"></div>
+        <div class="smoke-particle"></div>
+        <div class="smoke-particle"></div>
+        <div class="fire-emoji">🔥</div>
+      </div>
+      <div class="file-particle" style="top:50px;left:80px;animation-delay:.1s">📄</div>
+      <div class="file-particle" style="top:60px;left:70px;animation-delay:.4s">🗂</div>
+      <div class="file-particle" style="top:55px;left:90px;animation-delay:.7s">📋</div>
+    </div>
+    <div class="burn-progress-wrap"><div class="burn-progress-bar" id="burnBar"></div></div>
+    <div class="burn-progress-text" id="burnProgressText">Preparing...</div>
+    <div class="burn-result" id="burnResult"></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🧹</div>
+      <div class="logo-text">
+        <h1>CleanClicks</h1>
+        <span>✨ BoBo says your PC is clean!</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="last-clean-badge" id="lastCleanBadge">✅ Cleaned just now</div>
+      <button class="btn-header" onclick="runHealthCheck()">🩺 Health Check</button>
+      <button class="btn-header btn-dark-mode" onclick="toggleDark()" title="Dark Mode">🌙</button>
+    </div>
+  </div>
+
+  <!-- DRIVE SELECTOR -->
+  <div class="drives-row" id="drivesRow"></div>
+
+  <!-- DISK STATS -->
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <!-- HEALTH SCORE -->
+  <div class="health-banner" id="healthBanner">
+    <div class="health-grade">
+      <div class="grade-circle" id="gradeCircle">
+        <div class="grade-letter" id="gradeLetter">—</div>
+        <div class="grade-score" id="gradeScore">—/100</div>
+      </div>
+      <div class="health-info">
+        <h3 id="healthLabel">Checking PC health...</h3>
+        <p id="healthSub">Analyzing all drives and system settings</p>
+      </div>
+    </div>
+    <div class="health-issues" id="healthIssues"></div>
+  </div>
+
+  <!-- LOW DISK ALERT -->
+  <div class="alert-banner" id="alertBanner">
+    <div class="alert-header">
+      <div class="alert-siren">🚨</div>
+      <div>
+        <div class="alert-title" id="alertTitle">⚠ Low Disk Space Detected</div>
+        <div style="font-size:12px;color:#dc2626;font-weight:600" id="alertMsg"></div>
+      </div>
+    </div>
+    <div class="alert-drive-tabs" id="alertDriveTabs"></div>
+    <div class="sugg-grid" id="suggGrid"></div>
+    <div class="alert-actions" id="alertActions"></div>
+  </div>
+
+  <!-- FREED BANNER -->
+  <div class="freed-banner" id="freedBanner" style="display:none">
+    <span style="font-size:28px">🎉</span>
+    <div>
+      <div class="freed-total" id="freedTotal">0 MB freed</div>
+      <div class="freed-label">Total freed this session</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-row">
+    <button class="tab-btn active" onclick="switchTab('temp')">🗑 Temp & Cache</button>
+    <button class="tab-btn" onclick="switchTab('dupes')">📋 Duplicates</button>
+    <button class="tab-btn" onclick="switchTab('startup')">🚀 Startup</button>
+    <button class="tab-btn" onclick="switchTab('large')">🔍 Large Files</button>
+    <button class="tab-btn" onclick="switchTab('privacy')">🛡 Privacy</button>
+    <button class="tab-btn" onclick="switchTab('autoclean')">⚡ Auto-Clean</button>
+    <button class="tab-btn" onclick="switchTab('shredder')">🔒 Shredder</button>
+    <button class="tab-btn" onclick="switchTab('registry')">🛠 Registry</button>
+    <button class="tab-btn" onclick="switchTab('monitor')">📊 Monitor</button>
+  </div>
+
+  <!-- ─── TAB: TEMP & CACHE ─────────────────────────────────── -->
+  <div class="tab-panel active" id="panel-temp">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🗑 Temp & Cache Files</div>
+          <div class="panel-subtitle">Windows temp, browser cache, logs & more</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="scanTemp()">🔍 Scan Now</button>
+          <button class="btn btn-danger" id="burnTempBtn" style="display:none" onclick="burnTemp()">🔥 Burn Selected</button>
+        </div>
+      </div>
+      <div id="tempResult"></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: DUPLICATES ───────────────────────────────────── -->
+  <div class="tab-panel" id="panel-dupes">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">📋 Duplicate File Finder</div>
+          <div class="panel-subtitle">SHA-256 hash comparison — catches renamed copies too</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <input id="dupePaths" placeholder="Leave empty = Downloads, Documents, Desktop, Pictures, Videos"
+               style="flex:1;min-width:200px;border:1.5px solid rgba(59,130,246,.25);border-radius:10px;padding:9px 14px;font-size:13px;font-family:var(--font);background:rgba(255,255,255,.8)">
+        <button class="btn btn-primary" onclick="scanDupes()">🔍 Scan</button>
+        <button class="btn btn-danger" id="burnDupesBtn" style="display:none" onclick="burnDupes()">🔥 Delete Selected</button>
+      </div>
+      <div id="dupesResult"></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: STARTUP ──────────────────────────────────────── -->
+  <div class="tab-panel" id="panel-startup">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🚀 Startup Manager</div>
+          <div class="panel-subtitle">Control what launches when Windows starts</div>
+        </div>
+        <button class="btn btn-primary" onclick="loadStartup()">🔄 Refresh</button>
+      </div>
+      <div id="startupResult"></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: LARGE FILES ──────────────────────────────────── -->
+  <div class="tab-panel" id="panel-large">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🔍 Large File Finder</div>
+          <div class="panel-subtitle">Locate space hogs hiding on your drive</div>
+        </div>
+      </div>
+      <div class="lf-controls">
+        <span style="font-size:14px;font-weight:700;color:#374151">Min size:</span>
+        <input class="lf-input" type="number" id="lfMinMb" value="100" min="1">
+        <span style="font-size:13px;font-weight:600;color:#64748b">MB</span>
+        <button class="btn btn-primary" onclick="scanLarge()">🔍 Find Large Files</button>
+        <button class="btn btn-danger btn-sm" id="burnLargeBtn" style="display:none" onclick="burnLarge()">🔥 Delete Selected</button>
+      </div>
+      <div id="largeResult"></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: PRIVACY ──────────────────────────────────────── -->
+  <div class="tab-panel" id="panel-privacy">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🛡 Privacy Cleaner</div>
+          <div class="panel-subtitle">Browser history, cookies, recent files & more</div>
+        </div>
+      </div>
+      <div style="margin-bottom:14px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="loadPrivacy()">🔍 Scan Privacy Data</button>
+        <button class="btn btn-danger" id="burnPrivacyBtn" style="display:none" onclick="burnPrivacy()">🛡 Clean Selected</button>
+      </div>
+      <div id="privacyResult"></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: AUTO-CLEAN ───────────────────────────────────── -->
+  <div class="tab-panel" id="panel-autoclean">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">⚡ Auto-Clean Engine</div>
+          <div class="panel-subtitle">Silently cleans temp files, cache & logs in the background</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-success btn-sm" onclick="triggerClean()">🔥 Clean Now</button>
+          <button class="btn btn-ghost btn-sm" id="toggleAcBtn" onclick="toggleAC()">⏸ Pause</button>
+        </div>
+      </div>
+
+      <!-- Status stats -->
+      <div class="ac-status-row" id="acStatsRow"></div>
+
+      <!-- Countdown + controls -->
+      <div style="text-align:center;margin-bottom:16px">
+        <div class="countdown-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle class="ring-track" cx="40" cy="40" r="35"/>
+            <circle class="ring-prog" id="ringProg" cx="40" cy="40" r="35"/>
+          </svg>
+          <div class="countdown-text" id="countdownText">—</div>
+        </div>
+        <div style="font-size:12px;color:#64748b;font-weight:600" id="acStatusLabel">Loading...</div>
+      </div>
+
+      <div class="ac-controls">
+        <span style="font-size:13px;font-weight:700;color:#374151">Run every:</span>
+        <div class="interval-btns" id="intervalBtns">
+          <button class="interval-btn" onclick="setInterval_(300)">5 min</button>
+          <button class="interval-btn" onclick="setInterval_(600)">10 min</button>
+          <button class="interval-btn" onclick="setInterval_(900)">15 min</button>
+          <button class="interval-btn" onclick="setInterval_(1800)">30 min</button>
+          <button class="interval-btn" onclick="setInterval_(3600)">1 hr</button>
+        </div>
+      </div>
+
+      <!-- Disk trend chart -->
+      <div class="trend-wrap">
+        <div class="trend-header">
+          <div class="trend-title">📊 Free Space Trend</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <select id="trendDrive" onchange="drawTrend()" style="border:1.5px solid rgba(59,130,246,.2);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;font-family:var(--font)"></select>
+            <div class="trend-btns">
+              <button class="trend-btn active" onclick="setTrendHours(6,this)">6h</button>
+              <button class="trend-btn" onclick="setTrendHours(24,this)">24h</button>
+              <button class="trend-btn" onclick="setTrendHours(72,this)">3d</button>
+            </div>
+          </div>
+        </div>
+        <canvas id="trendChart"></canvas>
+        <div id="trendInfo" style="font-size:12px;color:#64748b;margin-top:8px;font-weight:600"></div>
+      </div>
+
+      <!-- Activity log -->
+      <div style="margin-top:16px">
+        <div style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:8px">📜 Activity Log</div>
+        <div class="ac-log" id="acLog">
+          <div class="loading"><div class="spinner"></div>Loading history...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+  <!-- ─── TAB: SECURE SHREDDER ─────────────────────────────── -->
+  <div class="tab-panel" id="panel-shredder">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🔒 Secure File Shredder</div>
+          <div class="panel-subtitle">Overwrite files with random data — impossible to recover even with forensic tools</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px solid #f59e0b;border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#92400e;font-weight:600">
+        ⚠ Files are permanently destroyed. This cannot be undone. Use for sensitive documents, personal files, or confidential data.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+        <span style="font-size:13px;font-weight:700;color:#374151">Shred Method:</span>
+        <div style="display:flex;gap:6px">
+          <button class="interval-btn" id="shredSimple" onclick="setShredMethod('simple',this)">1-Pass (Quick)</button>
+          <button class="interval-btn active" id="shredDod" onclick="setShredMethod('dod',this)">DoD 3-Pass (Standard)</button>
+          <button class="interval-btn" id="shredGutmann" onclick="setShredMethod('gutmann',this)">Gutmann 7-Pass (Max)</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <input id="shredPaths" placeholder="Paste full file path here..." style="flex:1;min-width:200px;border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:9px 14px;font-size:13px;font-family:var(--font);background:rgba(255,255,255,.8)">
+        <button class="btn btn-primary" onclick="addShredPath()">➕ Add</button>
+      </div>
+      <div id="shredQueue" style="margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-danger" id="shredBtn" style="display:none" onclick="startShred()">🔒 Shred Selected Files</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearShredQueue()">🗑 Clear List</button>
+      </div>
+      <div id="shredProgress" style="display:none;margin-top:16px">
+        <div style="font-size:14px;font-weight:700;color:#dc2626;margin-bottom:8px">🔒 Shredding in progress...</div>
+        <div style="background:#f1f5f9;border-radius:10px;height:14px;overflow:hidden;margin-bottom:8px">
+          <div id="shredBar" style="height:100%;background:linear-gradient(90deg,#dc2626,#7c3aed);border-radius:10px;transition:width .3s;width:0%"></div>
+        </div>
+        <div id="shredStatus" style="font-size:12px;color:#64748b;font-weight:600"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: REGISTRY CLEANER ─────────────────────────────── -->
+  <div class="tab-panel" id="panel-registry">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">🛠 Registry Cleaner</div>
+          <div class="panel-subtitle">Find and fix broken registry entries — invalid paths, bad startups, broken associations</div>
+        </div>
+        <button class="btn btn-primary" onclick="scanRegistry()">🔍 Scan Registry</button>
+      </div>
+      <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#1e40af;font-weight:600">
+        ✅ CleanClicks only removes entries where the referenced files no longer exist — it never touches valid system entries.
+      </div>
+      <div id="registryResult"></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: SYSTEM MONITOR ───────────────────────────────── -->
+  <div class="tab-panel" id="panel-monitor">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">📊 Live System Monitor</div>
+          <div class="panel-subtitle">Real-time CPU, RAM and disk — updates every 3 seconds</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="monitorDot" style="width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse-dot 1.5s ease-in-out infinite"></div>
+          <span style="font-size:12px;font-weight:700;color:#22c55e">LIVE</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div style="background:white;border-radius:14px;padding:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+          <div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">CPU Usage</div>
+          <canvas id="cpuGauge" width="120" height="70" style="display:block;margin:0 auto"></canvas>
+          <div id="cpuPct" style="font-size:28px;font-weight:900;margin-top:6px;color:#3b82f6">—%</div>
+          <div id="cpuLabel" style="font-size:11px;color:#94a3b8;font-weight:600">Measuring...</div>
+        </div>
+        <div style="background:white;border-radius:14px;padding:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+          <div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">RAM Usage</div>
+          <canvas id="ramGauge" width="120" height="70" style="display:block;margin:0 auto"></canvas>
+          <div id="ramPct" style="font-size:28px;font-weight:900;margin-top:6px;color:#8b5cf6">—%</div>
+          <div id="ramLabel" style="font-size:11px;color:#94a3b8;font-weight:600">Measuring...</div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:12px">💾 Drive Usage</div>
+        <div id="monitorDrives"></div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:12px">🔝 Top Processes by Memory</div>
+        <div id="monitorProcs"></div>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   GLOBALS
+══════════════════════════════════════════════════════════════════════════ */
+const API = 'http://localhost:5050/api';
+let drives = [];
+let selectedDrive = 'C';
+let sessionFreed = 0;
+let acInterval = 300;
+let acActive = true;
+let acLastClean = null;
+let countdownTimer = null;
+let trendHours = 6;
+let trendData = [];
+let acHistory = [];
+
+/* ══════════════════════════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════════════════════════ */
+function fmt(bytes) {
+  if (bytes >= 1073741824) return (bytes/1073741824).toFixed(1)+' GB';
+  if (bytes >= 1048576)    return (bytes/1048576).toFixed(1)+' MB';
+  if (bytes >= 1024)       return (bytes/1024).toFixed(1)+' KB';
+  return bytes+' B';
+}
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts*1000);
+  return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+function fmtAgo(ts) {
+  if (!ts) return 'Never';
+  const s = Math.floor(Date.now()/1000 - ts);
+  if (s<60)  return 'Just now';
+  if (s<3600) return Math.floor(s/60)+'m ago';
+  return Math.floor(s/3600)+'h ago';
+}
+async function api(path, opts={}) {
+  const res = await fetch(API+path, opts);
+  return res.json();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const panels=['temp','dupes','startup','large','privacy','autoclean','shredder','registry','monitor'];
+  const idx = panels.indexOf(name);
+  if (idx>=0) {
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    document.getElementById('panel-'+name).classList.add('active');
+  }
+  if (name==='startup') loadStartup();
+  if (name==='monitor') startMonitor();
+  if (name==='autoclean') refreshAC();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════════════════ */
+async function init() {
+  try {
+    drives = await api('/drives');
+    renderDrives();
+    renderStats();
+    loadHealthScore();
+    runHealthCheck();
+    refreshAC();
+    startCountdown();
+    setTimeout(drawTrend, 1000);
+  } catch(e) {
+    document.getElementById('statsGrid').innerHTML =
+      '<div class="panel-card" style="grid-column:1/-1;text-align:center;color:#ef4444;padding:20px;font-weight:700">⚠ Cannot connect to CleanClicks backend.<br><small>Make sure <code>cleaner_backend.py</code> is running!</small></div>';
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DRIVES
+══════════════════════════════════════════════════════════════════════════ */
+function renderDrives() {
+  const row = document.getElementById('drivesRow');
+  row.innerHTML = '';
+  drives.forEach(d => {
+    const pct = d.pct;
+    const color = pct>85?'#ef4444':pct>70?'#f97316':'#22c55e';
+    const btn = document.createElement('div');
+    btn.className = 'drive-btn'+(d.letter===selectedDrive?' active':'');
+    btn.innerHTML = `
+      <div class="drive-letter">💽 ${d.letter}:</div>
+      <div class="drive-bar-wrap"><div class="drive-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="drive-info">${fmt(d.free)} free</div>
+    `;
+    btn.onclick = () => { selectedDrive=d.letter; renderDrives(); renderStats(); };
+    row.appendChild(btn);
+
+    // Populate trend drive select
+    const sel = document.getElementById('trendDrive');
+    if (!sel.querySelector(`option[value="${d.letter}"]`)) {
+      const opt = document.createElement('option');
+      opt.value = d.letter; opt.textContent = d.letter+':';
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function renderStats() {
+  const d = drives.find(x=>x.letter===selectedDrive) || drives[0];
+  if (!d) return;
+  const pct = d.pct;
+  const color = pct>85?'#ef4444':pct>70?'#f97316':'#22c55e';
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon">💾</div>
+      <div><div class="stat-label">Total Space</div><div class="stat-value">${fmt(d.total)}</div><div class="stat-sub">Drive ${d.letter}:</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div><div class="stat-label">Used Space</div><div class="stat-value" style="color:${color}">${fmt(d.used)}</div><div class="stat-sub">${pct}% full</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✨</div>
+      <div><div class="stat-label">Free Space</div><div class="stat-value" style="color:#22c55e">${fmt(d.free)}</div><div class="stat-sub">${(100-pct).toFixed(1)}% available</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🧹</div>
+      <div><div class="stat-label">Session Freed</div><div class="stat-value" style="color:#8b5cf6">${fmt(sessionFreed)}</div><div class="stat-sub">This session</div></div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HEALTH SCORE
+══════════════════════════════════════════════════════════════════════════ */
+async function loadHealthScore() {
+  try {
+    const data = await api('/health-score');
+    const circle = document.getElementById('gradeCircle');
+    circle.style.background = data.color;
+    document.getElementById('gradeLetter').textContent = data.grade;
+    document.getElementById('gradeScore').textContent = data.score+'/100';
+    document.getElementById('healthLabel').textContent = data.label+' — Grade '+data.grade;
+    document.getElementById('healthSub').textContent = data.issues.length
+      ? data.issues.length+' issue(s) found'
+      : '✅ Your PC is in great shape!';
+    const issueEl = document.getElementById('healthIssues');
+    issueEl.innerHTML =
+      data.issues.slice(0,3).map(i=>`<div class="health-issue">⚠ ${i}</div>`).join('')+
+      data.tips.slice(0,2).map(t=>`<div class="health-tip">${t}</div>`).join('');
+  } catch(e){}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HEALTH CHECK / LOW DISK ALERT
+══════════════════════════════════════════════════════════════════════════ */
+async function runHealthCheck() {
+  loadHealthScore();
+  try {
+    const data = await api('/health-check');
+    const banner = document.getElementById('alertBanner');
+    if (!data.alerts || !data.alerts.length) { banner.classList.remove('show'); return; }
+    banner.classList.add('show');
+    const tabs = document.getElementById('alertDriveTabs');
+    tabs.innerHTML = data.alerts.map((a,i)=>`
+      <div class="alert-tab${i===0?' active':''}" onclick="showAlertDrive(${i},this,alertData)" data-idx="${i}">
+        ⚠ ${a.drive}: · ${fmt(a.free)} free
+      </div>`).join('');
+    window.alertData = data.alerts;
+    showAlertDrive(0, tabs.querySelector('.alert-tab'), data.alerts);
+  } catch(e) {}
+}
+
+function showAlertDrive(idx, el, alerts) {
+  document.querySelectorAll('.alert-tab').forEach(t=>t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const a = alerts[idx];
+  document.getElementById('alertTitle').textContent = `⚠ Low Disk Space on ${a.drive}: — ${fmt(a.free)} remaining`;
+  renderSuggestions(a.suggestions, a.drive);
+}
+
+function renderSuggestions(suggestions, drive) {
+  if (!suggestions || !suggestions.length) {
+    document.getElementById('suggGrid').innerHTML = '<div style="padding:12px;font-size:13px;color:#059669;font-weight:700">✅ No cleanable files found on this drive.</div>';
+    return;
+  }
+  const pillClass = p => p==='HIGH'?'pill-red':p==='MEDIUM'?'pill-orange':'pill-blue';
+  document.getElementById('suggGrid').innerHTML = suggestions.map(s=>`
+    <div class="sugg-card">
+      <div class="sugg-left">
+        <div class="sugg-icon">${s.icon}</div>
+        <div>
+          <div class="sugg-name">${s.category}</div>
+          <div class="sugg-reason">${s.reason}</div>
+        </div>
+      </div>
+      <div class="sugg-right">
+        <div>
+          <div class="sugg-size">${fmt(s.size)}</div>
+          <div class="sugg-files">${s.file_count} files</div>
+        </div>
+        <span class="pill ${pillClass(s.priority)}">${s.priority}</span>
+        <button class="btn-burn-sm" onclick="burnCategory('${s.category}','${drive}')">🔥</button>
+      </div>
+    </div>
+  `).join('');
+  const total = suggestions.filter(s=>s.priority==='HIGH').reduce((a,b)=>a+b.size,0);
+  document.getElementById('alertActions').innerHTML = `
+    <button class="btn btn-danger btn-sm" onclick="burnAll('${drive}')">🔥 Burn All HIGH — ${fmt(total)}</button>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('alertBanner').classList.remove('show')">Dismiss</button>
+  `;
+}
+
+async function burnCategory(category, drive) {
+  showBurnOverlay('Burning '+category+'...');
+  const data = await api('/burn-category', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({category, drive})});
+  addFreed(data.freed);
+  hideBurnOverlay(data.freed, data.deleted);
+  runHealthCheck();
+  loadHealthScore();
+}
+
+async function burnAll(drive) {
+  const suggs = window.alertData?.find(a=>a.drive===drive)?.suggestions?.filter(s=>s.priority==='HIGH') || [];
+  showBurnOverlay('Burning all HIGH priority files...');
+  let total = 0;
+  for (const s of suggs) {
+    const d = await api('/burn-category', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({category:s.category, drive})});
+    total += d.freed;
+  }
+  addFreed(total);
+  hideBurnOverlay(total, 0);
+  runHealthCheck(); loadHealthScore();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TEMP & CACHE
+══════════════════════════════════════════════════════════════════════════ */
+async function scanTemp() {
+  document.getElementById('tempResult').innerHTML = '<div class="loading"><div class="spinner"></div>Scanning for temp & cache files...</div>';
+  document.getElementById('burnTempBtn').style.display = 'none';
+  const data = await api(`/scan-temp?drive=${selectedDrive}`);
+  if (!data.files || !data.files.length) {
+    document.getElementById('tempResult').innerHTML = '<div class="empty"><div class="empty-icon">✨</div><div class="empty-text">Drive looks clean!</div><div class="empty-sub">No temp files found.</div></div>';
+    return;
+  }
+  document.getElementById('burnTempBtn').style.display = 'flex';
+  document.getElementById('tempResult').innerHTML = `
+    <div class="file-controls">
+      <label class="select-all-wrap"><input type="checkbox" id="tempSelectAll" onchange="toggleAll('tempList',this)"> Select All</label>
+      <span class="file-count-badge">${data.total_files.toLocaleString()} files · ${fmt(data.total_size)}</span>
+    </div>
+    <div class="file-list" id="tempList">
+      ${data.files.map(f=>`
+        <div class="file-item">
+          <input type="checkbox" class="temp-file" value="${f.path}" checked>
+          <div style="flex:1;overflow:hidden"><div class="file-name" title="${f.path}">${f.name}</div><div class="file-path">${f.dir}</div></div>
+          <div class="file-size">${fmt(f.size)}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+async function burnTemp() {
+  const paths = [...document.querySelectorAll('.temp-file:checked')].map(x=>x.value);
+  if (!paths.length) return;
+  showBurnOverlay(`Burning ${paths.length} files...`);
+  const data = await api('/delete-files', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({paths})});
+  addFreed(data.freed);
+  hideBurnOverlay(data.freed, data.deleted);
+  scanTemp();
+  loadHealthScore();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DUPLICATES
+══════════════════════════════════════════════════════════════════════════ */
+async function scanDupes() {
+  const paths = document.getElementById('dupePaths').value;
+  document.getElementById('dupesResult').innerHTML = '<div class="loading"><div class="spinner"></div>Scanning for duplicates (this may take a minute)...</div>';
+  document.getElementById('burnDupesBtn').style.display = 'none';
+  const data = await api(`/scan-duplicates?paths=${encodeURIComponent(paths)}`);
+  if (!data.groups || !data.groups.length) {
+    document.getElementById('dupesResult').innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">No duplicates found!</div><div class="empty-sub">Your files are unique.</div></div>';
+    return;
+  }
+  document.getElementById('burnDupesBtn').style.display = 'flex';
+  document.getElementById('dupesResult').innerHTML = `
+    <div class="file-controls">
+      <label class="select-all-wrap"><input type="checkbox" onchange="toggleAll('dupesContainer',this)"> Select All</label>
+      <span class="file-count-badge">${data.total_groups} groups · ${fmt(data.total_wasted)} wasted</span>
+    </div>
+    <div id="dupesContainer">
+    ${data.groups.map((g,gi)=>`
+      <div class="dup-group">
+        <div class="dup-group-header">
+          <span style="font-size:18px">🔗</span>
+          <span style="font-size:13px;font-weight:700;color:#0369a1">${g.files.length} copies · ${fmt(g.wasted)} wasted</span>
+        </div>
+        <div class="dup-files">
+          ${g.files.slice(1).map(f=>`
+            <div class="file-item">
+              <input type="checkbox" class="dupe-file" value="${f.path}" checked>
+              <div style="flex:1;overflow:hidden"><div class="file-name" title="${f.path}">${f.name}</div><div class="file-path">${f.path}</div></div>
+              <div class="file-size">${fmt(f.size)}</div>
+            </div>`).join('')}
+          <div class="file-item" style="background:#f0fdf4">
+            <span style="font-size:14px">✅</span>
+            <div style="flex:1"><div class="file-name" style="color:#059669">KEEPING: ${g.files[0].name}</div><div class="file-path">${g.files[0].path}</div></div>
+            <div class="file-size" style="color:#059669">${fmt(g.files[0].size)}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+}
+
+async function burnDupes() {
+  const paths = [...document.querySelectorAll('.dupe-file:checked')].map(x=>x.value);
+  if (!paths.length) return;
+  showBurnOverlay(`Removing ${paths.length} duplicate files...`);
+  const data = await api('/delete-duplicates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({paths})});
+  addFreed(data.freed);
+  hideBurnOverlay(data.freed, data.deleted);
+  scanDupes();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STARTUP MANAGER
+══════════════════════════════════════════════════════════════════════════ */
+async function loadStartup() {
+  document.getElementById('startupResult').innerHTML = '<div class="loading"><div class="spinner"></div>Reading startup registry...</div>';
+  const data = await api('/startup');
+  if (!data.items || !data.items.length) {
+    document.getElementById('startupResult').innerHTML = '<div class="empty"><div class="empty-icon">✨</div><div class="empty-text">No startup items found</div></div>';
+    return;
+  }
+  document.getElementById('startupResult').innerHTML = `
+    <div style="margin-bottom:10px;font-size:13px;color:#64748b;font-weight:600">
+      ${data.items.length} items startup with Windows. Toggle off to speed up boot time.
+    </div>
+    ${data.items.map((item,i)=>`
+    <div class="startup-item">
+      <div style="flex:1;overflow:hidden">
+        <div class="startup-name">🚀 ${item.name}</div>
+        <div class="startup-cmd" title="${item.command}">${item.command}</div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:2px">${item.hive}</div>
+      </div>
+      <label class="toggle-switch" title="Toggle startup">
+        <input type="checkbox" checked onchange="toggleStartup('${item.name.replace(/'/g,"\\'")}','${item.hive}','${item.subkey.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}',this)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`).join('')}`;
+}
+
+async function toggleStartup(name, hive, subkey, checkbox) {
+  if (!checkbox.checked) {
+    const data = await api('/startup/disable', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name, hive, subkey})});
+    if (!data.success) { checkbox.checked=true; alert('Could not disable: '+data.error); }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LARGE FILES
+══════════════════════════════════════════════════════════════════════════ */
+async function scanLarge() {
+  const minMb = document.getElementById('lfMinMb').value || 100;
+  document.getElementById('largeResult').innerHTML = '<div class="loading"><div class="spinner"></div>Scanning drive for large files...</div>';
+  document.getElementById('burnLargeBtn').style.display = 'none';
+  const data = await api(`/large-files?drive=${selectedDrive}&min_mb=${minMb}`);
+  if (!data.files || !data.files.length) {
+    document.getElementById('largeResult').innerHTML = `<div class="empty"><div class="empty-icon">✨</div><div class="empty-text">No files larger than ${minMb} MB found</div></div>`;
+    return;
+  }
+  document.getElementById('burnLargeBtn').style.display = 'flex';
+  document.getElementById('largeResult').innerHTML = `
+    <div class="file-controls">
+      <label class="select-all-wrap"><input type="checkbox" onchange="toggleAll('largeList',this)"> Select All</label>
+      <span class="file-count-badge">${data.files.length} files found</span>
+    </div>
+    <div class="file-list" id="largeList">
+    ${data.files.map(f=>`
+      <div class="file-item">
+        <input type="checkbox" class="large-file" value="${f.path}">
+        <div style="flex:1;overflow:hidden">
+          <div class="file-name" title="${f.path}">${f.name}</div>
+          <div class="file-path">${f.path}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="file-size">${fmt(f.size)}</div>
+          <div style="font-size:10px;color:#94a3b8">${new Date(f.modified*1000).toLocaleDateString()}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:6px" onclick="openFolder('${f.path.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">📂</button>
+      </div>`).join('')}
+    </div>`;
+}
+
+async function burnLarge() {
+  const paths = [...document.querySelectorAll('.large-file:checked')].map(x=>x.value);
+  if (!paths.length) { alert('Select at least one file to delete.'); return; }
+  if (!confirm(`Delete ${paths.length} file(s)? This cannot be undone.`)) return;
+  showBurnOverlay(`Deleting ${paths.length} large files...`);
+  const data = await api('/delete-files', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({paths})});
+  addFreed(data.freed);
+  hideBurnOverlay(data.freed, data.deleted);
+  scanLarge();
+}
+
+async function openFolder(path) {
+  await api('/open-folder', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({path})});
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRIVACY CLEANER
+══════════════════════════════════════════════════════════════════════════ */
+async function loadPrivacy() {
+  document.getElementById('privacyResult').innerHTML = '<div class="loading"><div class="spinner"></div>Scanning privacy data...</div>';
+  document.getElementById('burnPrivacyBtn').style.display = 'none';
+  const data = await api('/privacy-scan');
+  if (!data.items || !data.items.length) {
+    document.getElementById('privacyResult').innerHTML = '<div class="empty"><div class="empty-icon">✨</div><div class="empty-text">No privacy data found</div></div>';
+    return;
+  }
+  document.getElementById('burnPrivacyBtn').style.display = 'flex';
+  document.getElementById('privacyResult').innerHTML = data.items.map(item=>`
+    <div class="privacy-item">
+      <div class="privacy-check">
+        <input type="checkbox" class="privacy-cat" value="${item.category}" ${item.count>0?'checked':''} ${item.count===0?'disabled':''}>
+        <div>
+          <div class="privacy-label">${item.category}</div>
+          <div class="privacy-meta">${item.count} items · ${fmt(item.size)}</div>
+        </div>
+      </div>
+      <span class="pill ${item.count>0?'pill-orange':'pill-blue'}">${item.count>0?fmt(item.size):'Clean'}</span>
+    </div>`).join('');
+}
+
+async function burnPrivacy() {
+  const categories = [...document.querySelectorAll('.privacy-cat:checked')].map(x=>x.value);
+  if (!categories.length) return;
+  if (!confirm('This will permanently delete selected privacy data. Continue?')) return;
+  showBurnOverlay('Cleaning privacy data...');
+  const data = await api('/privacy-clean', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({categories})});
+  addFreed(data.freed);
+  hideBurnOverlay(data.freed, data.deleted);
+  loadPrivacy();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AUTO-CLEAN
+══════════════════════════════════════════════════════════════════════════ */
+async function refreshAC() {
+  try {
+    const data = await api('/auto-clean/status');
+    acActive = data.active;
+    acInterval = data.interval;
+    acLastClean = data.last_clean;
+    acHistory = data.history || [];
+
+    document.getElementById('acStatsRow').innerHTML = `
+      <div class="ac-stat"><div class="ac-val">${fmt(data.total_freed)}</div><div class="ac-lbl">Total Freed</div></div>
+      <div class="ac-stat"><div class="ac-val">${data.total_deleted?.toLocaleString()||0}</div><div class="ac-lbl">Files Removed</div></div>
+      <div class="ac-stat"><div class="ac-val">${data.history_count||0}</div><div class="ac-lbl">Clean Runs</div></div>
+      <div class="ac-stat"><div class="ac-val">${fmtAgo(data.last_clean)}</div><div class="ac-lbl">Last Clean</div></div>
+    `;
+
+    document.getElementById('toggleAcBtn').textContent = acActive ? '⏸ Pause' : '▶ Resume';
+    document.getElementById('acStatusLabel').textContent = acActive ? '⚡ Auto-Clean is active' : '⏸ Auto-Clean is paused';
+
+    // Update interval buttons
+    document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));
+    const intervals=[300,600,900,1800,3600];
+    const idx=intervals.indexOf(acInterval);
+    if (idx>=0) document.querySelectorAll('.interval-btn')[idx].classList.add('active');
+
+    // Render log
+    renderACLog(acHistory);
+
+    // Update last clean badge
+    if (data.last_clean) {
+      const badge = document.getElementById('lastCleanBadge');
+      badge.style.display='block';
+      badge.textContent=`🧹 ${fmtAgo(data.last_clean)} · +${fmt(data.last_freed)}`;
+    }
+  } catch(e){}
+}
+
+function renderACLog(history) {
+  const log = document.getElementById('acLog');
+  if (!history || !history.length) {
+    log.innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;font-weight:600">No auto-clean runs yet.<br>First run will happen soon!</div>';
+    return;
+  }
+  log.innerHTML=[...history].reverse().map(h=>`
+    <div class="ac-log-entry">
+      <div class="ac-log-icon">🧹</div>
+      <div class="ac-log-info">
+        <div class="ac-log-freed">+${fmt(h.freed)}</div>
+        <div class="ac-log-cats">${h.cats?.join(', ')||'System files'}</div>
+      </div>
+      <div class="ac-log-time">${fmtTime(h.ts)}</div>
+    </div>`).join('');
+}
+
+async function triggerClean() {
+  await api('/auto-clean/run', {method:'POST'});
+  showBurnOverlay('Running auto-clean now...');
+  setTimeout(async()=>{
+    hideBurnOverlay(0,0);
+    await refreshAC();
+    await drawTrend();
+    await loadHealthScore();
+    drives = await api('/drives');
+    renderStats();
+  }, 3000);
+}
+
+async function toggleAC() {
+  const data = await api('/auto-clean/toggle', {method:'POST'});
+  acActive = data.active;
+  document.getElementById('toggleAcBtn').textContent = acActive?'⏸ Pause':'▶ Resume';
+  document.getElementById('acStatusLabel').textContent = acActive?'⚡ Auto-Clean is active':'⏸ Auto-Clean is paused';
+}
+
+async function setInterval_(seconds) {
+  await api('/auto-clean/interval', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({seconds})});
+  acInterval = seconds;
+  document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));
+  const intervals=[300,600,900,1800,3600];
+  const idx=intervals.indexOf(seconds);
+  if (idx>=0) document.querySelectorAll('.interval-btn')[idx].classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COUNTDOWN RING
+══════════════════════════════════════════════════════════════════════════ */
+let countdownSec = 0;
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(tickCountdown, 1000);
+}
+function tickCountdown() {
+  if (!acActive) { document.getElementById('countdownText').textContent='Paused'; return; }
+  let elapsed = acLastClean ? (Date.now()/1000 - acLastClean) : acInterval;
+  let remaining = Math.max(0, acInterval - elapsed % acInterval);
+  const m = Math.floor(remaining/60), s = Math.floor(remaining%60);
+  document.getElementById('countdownText').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  const prog = document.getElementById('ringProg');
+  const circ = 2*Math.PI*35;
+  const offset = circ * (1 - remaining/acInterval);
+  prog.style.strokeDashoffset = circ - offset;
+  if (remaining < 5 && remaining > 0) refreshAC();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DISK TREND CHART
+══════════════════════════════════════════════════════════════════════════ */
+async function drawTrend() {
+  const drive = document.getElementById('trendDrive').value || 'C';
+  try {
+    const data = await api(`/disk-trend?drive=${drive}&hours=${trendHours}`);
+    trendData = data.points || [];
+    renderTrendChart(trendData);
+  } catch(e){}
+}
+
+function setTrendHours(h, btn) {
+  trendHours = h;
+  document.querySelectorAll('.trend-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawTrend();
+}
+
+function renderTrendChart(points) {
+  const canvas = document.getElementById('trendChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 600, H = 140;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+
+  if (!points || points.length < 2) {
+    ctx.fillStyle='#94a3b8';ctx.font='14px Nunito,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Collecting data... auto-clean runs will appear here.',W/2,H/2);
+    return;
+  }
+
+  const vals = points.map(p=>p.free);
+  const minV=Math.min(...vals), maxV=Math.max(...vals);
+  const range = maxV-minV || 1;
+
+  const xStep = (W-40)/(points.length-1);
+  const toY = v => H-20-(v-minV)/range*(H-30);
+
+  // Grid lines
+  ctx.strokeStyle='#f1f5f9';ctx.lineWidth=1;
+  for (let i=0;i<=4;i++) {
+    const y = 10+i*(H-30)/4;
+    ctx.beginPath();ctx.moveTo(30,y);ctx.lineTo(W-10,y);ctx.stroke();
+    ctx.fillStyle='#94a3b8';ctx.font='9px Nunito,sans-serif';ctx.textAlign='left';
+    ctx.fillText(fmt(minV+(4-i)*range/4),2,y+3);
+  }
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(59,130,246,.2)');
+  grad.addColorStop(1,'rgba(59,130,246,.0)');
+  ctx.fillStyle=grad;
+  ctx.beginPath();
+  ctx.moveTo(30,toY(points[0].free));
+  points.forEach((p,i)=>ctx.lineTo(30+i*xStep,toY(p.free)));
+  ctx.lineTo(30+(points.length-1)*xStep,H-10);
+  ctx.lineTo(30,H-10);
+  ctx.closePath();ctx.fill();
+
+  // Line
+  ctx.strokeStyle='#3b82f6';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    if (i===0) ctx.moveTo(30,toY(p.free));
+    else ctx.lineTo(30+i*xStep,toY(p.free));
+  });
+  ctx.stroke();
+
+  // Dots
+  points.forEach((p,i)=>{
+    if (i===0||i===points.length-1||i%5===0) {
+      ctx.beginPath();ctx.arc(30+i*xStep,toY(p.free),4,0,2*Math.PI);
+      ctx.fillStyle='white';ctx.fill();
+      ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.stroke();
+    }
+  });
+
+  // Trend info
+  const delta = vals[vals.length-1]-vals[0];
+  document.getElementById('trendInfo').textContent =
+    delta>=0 ? `↑ +${fmt(delta)} recovered over this period` : `↓ ${fmt(Math.abs(delta))} consumed`;
+  document.getElementById('trendInfo').style.color = delta>=0?'#22c55e':'#ef4444';
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BURN OVERLAY
+══════════════════════════════════════════════════════════════════════════ */
+function showBurnOverlay(subtitle='Processing...') {
+  document.getElementById('burnSubtitle').textContent = subtitle;
+  document.getElementById('burnBar').style.width='0%';
+  document.getElementById('burnProgressText').textContent='Starting...';
+  document.getElementById('burnResult').style.display='none';
+  document.getElementById('burnOverlay').classList.add('active');
+  animateBurnBar();
+}
+let burnBarTimer=null;
+function animateBurnBar() {
+  let pct=0;
+  if (burnBarTimer) clearInterval(burnBarTimer);
+  burnBarTimer=setInterval(()=>{
+    pct=Math.min(95,pct+Math.random()*8);
+    document.getElementById('burnBar').style.width=pct+'%';
+    document.getElementById('burnProgressText').textContent=pct<30?'Scanning files...':pct<70?'Deleting...':'Almost done...';
+  },200);
+}
+function hideBurnOverlay(freed=0, deleted=0) {
+  clearInterval(burnBarTimer);
+  document.getElementById('burnBar').style.width='100%';
+  document.getElementById('burnProgressText').textContent='Complete!';
+  if (freed>0) {
+    document.getElementById('burnResult').style.display='block';
+    document.getElementById('burnResult').textContent=`✅ Done! Freed ${fmt(freed)} · ${deleted} files removed`;
+  }
+  setTimeout(()=>document.getElementById('burnOverlay').classList.remove('active'),2000);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════════════════ */
+function addFreed(bytes) {
+  sessionFreed += bytes;
+  if (sessionFreed>0) {
+    document.getElementById('freedBanner').style.display='flex';
+    document.getElementById('freedTotal').textContent=fmt(sessionFreed)+' freed';
+  }
+  renderStats();
+}
+
+function toggleAll(containerId, master) {
+  document.querySelectorAll('#'+containerId+' input[type=checkbox]').forEach(c=>{
+    if (!c.disabled) c.checked=master.checked;
+  });
+}
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  const btn=document.querySelector('.btn-dark-mode');
+  btn.textContent=document.body.classList.contains('dark')?'☀️':'🌙';
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECURE FILE SHREDDER
+══════════════════════════════════════════════════════════════════════════ */
+let shredMethod = 'dod';
+let shredFiles = [];
+
+function setShredMethod(method, btn) {
+  shredMethod = method;
+  document.querySelectorAll('#panel-shredder .interval-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function addShredPath() {
+  const input = document.getElementById('shredPaths');
+  const path = input.value.trim();
+  if (!path) return;
+  if (!shredFiles.includes(path)) {
+    shredFiles.push(path);
+    renderShredQueue();
+  }
+  input.value = '';
+}
+
+function renderShredQueue() {
+  const q = document.getElementById('shredQueue');
+  document.getElementById('shredBtn').style.display = shredFiles.length ? 'flex' : 'none';
+  if (!shredFiles.length) { q.innerHTML=''; return; }
+  q.innerHTML = `
+    <div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      ${shredFiles.map((f,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f1f5f9">
+          <span style="font-size:16px">🔒</span>
+          <div style="flex:1;font-size:12px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f}</div>
+          <button onclick="removeShredFile(${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px">✕</button>
+        </div>`).join('')}
+    </div>`;
+}
+
+function removeShredFile(idx) {
+  shredFiles.splice(idx, 1);
+  renderShredQueue();
+}
+
+function clearShredQueue() {
+  shredFiles = [];
+  renderShredQueue();
+}
+
+async function startShred() {
+  if (!shredFiles.length) return;
+  const methodNames = {simple:'1-Pass Quick',dod:'DoD 3-Pass',gutmann:'Gutmann 7-Pass'};
+  if (!confirm(`Permanently destroy ${shredFiles.length} file(s) using ${methodNames[shredMethod]} method?\n\nThis CANNOT be undone.`)) return;
+
+  document.getElementById('shredProgress').style.display = 'block';
+  document.getElementById('shredBtn').disabled = true;
+
+  await api('/shred', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({paths: shredFiles, method: shredMethod})});
+
+  // Poll progress
+  const poll = setInterval(async () => {
+    const p = await api('/shred/progress');
+    const pct = p.total > 0 ? Math.round(p.done / p.total * 100) : 0;
+    document.getElementById('shredBar').style.width = pct + '%';
+    document.getElementById('shredStatus').textContent =
+      p.active ? `Shredding: ${p.current} (${p.done}/${p.total} files)` :
+      `✅ Complete! ${fmt(p.freed)} permanently destroyed.`;
+    if (!p.active) {
+      clearInterval(poll);
+      document.getElementById('shredBtn').disabled = false;
+      shredFiles = [];
+      renderShredQueue();
+      addFreed(p.freed);
+    }
+  }, 600);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REGISTRY CLEANER
+══════════════════════════════════════════════════════════════════════════ */
+let registryIssues = [];
+
+async function scanRegistry() {
+  document.getElementById('registryResult').innerHTML = '<div class="loading"><div class="spinner"></div>Scanning Windows Registry — this takes 10-30 seconds...</div>';
+  const data = await api('/registry/scan');
+  registryIssues = data.issues || [];
+
+  if (!registryIssues.length) {
+    document.getElementById('registryResult').innerHTML = '<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Registry is clean!</div><div class="empty-sub">No broken or invalid entries found.</div></div>';
+    return;
+  }
+
+  const catCounts = {};
+  registryIssues.forEach(i => { catCounts[i.category] = (catCounts[i.category]||0)+1; });
+
+  document.getElementById('registryResult').innerHTML = `
+    <div class="file-controls" style="margin-bottom:12px">
+      <label class="select-all-wrap"><input type="checkbox" id="regSelectAll" onchange="toggleAll('regList',this)"> Select All</label>
+      <span class="file-count-badge">${registryIssues.length} issues found</span>
+      <button class="btn btn-danger btn-sm" onclick="fixRegistry()">🛠 Fix Selected</button>
+    </div>
+    <div id="regList">
+    ${registryIssues.map((item,i) => `
+      <div style="background:white;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:10px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+        <input type="checkbox" class="reg-issue" data-idx="${i}" checked style="width:16px;height:16px;accent-color:#8b5cf6">
+        <span style="font-size:20px">${item.icon}</span>
+        <div style="flex:1;overflow:hidden">
+          <div style="font-size:12px;font-weight:800;color:#1e293b">${item.category}</div>
+          <div style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${item.description}">${item.description}</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:1px">${item.hive}\\${item.key}</div>
+        </div>
+        <span class="pill pill-orange">Fix</span>
+      </div>`).join('')}
+    </div>`;
+}
+
+async function fixRegistry() {
+  const selected = [...document.querySelectorAll('.reg-issue:checked')].map(el => registryIssues[parseInt(el.dataset.idx)]);
+  if (!selected.length) return;
+  if (!confirm(`Fix ${selected.length} registry issue(s)?\nSelected entries will be removed from the registry.`)) return;
+
+  const data = await api('/registry/fix', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({items: selected})});
+
+  const msg = data.errors?.length
+    ? `Fixed ${data.fixed} issues (${data.errors.length} required admin rights)`
+    : `✅ Fixed ${data.fixed} registry issues successfully!`;
+
+  document.getElementById('registryResult').innerHTML = `
+    <div style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #6ee7b7;border-radius:12px;padding:20px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">✅</div>
+      <div style="font-size:16px;font-weight:800;color:#065f46">${msg}</div>
+      <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="scanRegistry()">🔍 Scan Again</button>
+    </div>`;
+  loadHealthScore();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LIVE SYSTEM MONITOR
+══════════════════════════════════════════════════════════════════════════ */
+let monitorTimer = null;
+let monitorActive = false;
+
+function startMonitor() {
+  monitorActive = true;
+  fetchMonitor();
+  if (!monitorTimer) monitorTimer = setInterval(fetchMonitor, 3000);
+}
+
+function stopMonitor() {
+  monitorActive = false;
+  if (monitorTimer) { clearInterval(monitorTimer); monitorTimer = null; }
+}
+
+async function fetchMonitor() {
+  if (!monitorActive) return;
+  try {
+    const data = await api('/system-monitor');
+    updateGauge('cpuGauge', data.cpu, '#3b82f6');
+    document.getElementById('cpuPct').textContent = data.cpu + '%';
+    document.getElementById('cpuLabel').textContent = data.cpu < 30 ? 'Idle' : data.cpu < 70 ? 'Normal' : data.cpu < 90 ? 'Heavy load' : '🔴 Overloaded';
+    document.getElementById('cpuPct').style.color = data.cpu > 85 ? '#ef4444' : '#3b82f6';
+
+    const ram = data.ram;
+    updateGauge('ramGauge', ram.pct, '#8b5cf6');
+    document.getElementById('ramPct').textContent = ram.pct + '%';
+    document.getElementById('ramLabel').textContent = `${fmt(ram.used)} / ${fmt(ram.total)} used`;
+    document.getElementById('ramPct').style.color = ram.pct > 85 ? '#ef4444' : '#8b5cf6';
+
+    // Drives
+    document.getElementById('monitorDrives').innerHTML = (data.drives||[]).map(d => {
+      const color = d.pct>85?'#ef4444':d.pct>70?'#f97316':'#22c55e';
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px">
+          <span>💽 ${d.letter}:</span>
+          <span style="color:${color}">${fmt(d.free)} free (${(100-d.pct).toFixed(0)}%)</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:6px;height:10px;overflow:hidden">
+          <div style="height:100%;background:${color};border-radius:6px;width:${d.pct}%;transition:width .5s"></div>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:2px">${fmt(d.used)} used of ${fmt(d.total)}</div>
+      </div>`;
+    }).join('');
+
+    // Processes
+    document.getElementById('monitorProcs').innerHTML = (data.processes||[]).map(p => {
+      const maxMem = data.processes[0]?.memory || 1;
+      const pct = Math.round(p.memory/maxMem*100);
+      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:120px;font-size:12px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600" title="${p.name}">${p.name}</div>
+        <div style="flex:1;background:#f1f5f9;border-radius:4px;height:8px;overflow:hidden">
+          <div style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);width:${pct}%;transition:width .5s"></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;width:60px;text-align:right">${fmt(p.memory)}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function updateGauge(id, pct, color) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=120, H=70, cx=60, cy=62, r=50;
+  ctx.clearRect(0,0,W,H);
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 2*Math.PI);
+  ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=10; ctx.lineCap='round';
+  ctx.stroke();
+
+  // Value arc
+  const endAngle = Math.PI + (pct/100)*Math.PI;
+  const arcColor = pct>85?'#ef4444':pct>60?'#f97316':color;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, endAngle);
+  ctx.strokeStyle=arcColor; ctx.lineWidth=10; ctx.lineCap='round';
+  ctx.stroke();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════════════════════════════════ */
+window.addEventListener('load', init);
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SPARKY — WALKS AROUND THE FULL SCREEN, CLEANS, SAYS DONE
+══════════════════════════════════════════════════════════════════════════ */
+
+const TRASH_ICONS = ['🗑','💾','📀','🗂','📦','🔧','⚙️','💿','📟','🖥','🗃','📁'];
+let boboX = -110, boboY = 300;
+let boboPhase = 0;   // 0=right along bottom, 1=up right side, 2=left along top, 3=down left side
+let boboRunning = false;
+
+function initScene() {
+  const bg = document.getElementById('sceneBg');
+  if (!bg) return;
+
+  // Clear old items
+  bg.querySelectorAll('.paper,.dust-puff,.trash-item').forEach(e=>e.remove());
+
+  // ── Falling papers ────────────────────────────────────────────────────────
+  const paperColors = ['#fed7aa','#fef08a','#fca5a5','#d1d5db','#c7d2fe','#fde68a','#bbf7d0'];
+  for (let i=0;i<12;i++) {
+    const p = document.createElement('div');
+    p.className = 'paper';
+    const sz = 22 + Math.random()*26;
+    Object.assign(p.style, {
+      left: (5+Math.random()*90)+'%',
+      width: sz+'px', height: (sz*1.3)+'px',
+      background: paperColors[Math.floor(Math.random()*paperColors.length)],
+      boxShadow: '2px 2px 6px rgba(0,0,0,.12)',
+      clipPath: 'polygon(0 4%,90% 0,100% 7%,96% 93%,100% 100%,7% 97%,0 100%)',
+      animationDuration: (7+Math.random()*10)+'s',
+      animationDelay: (Math.random()*20)+'s',
+    });
+    p.innerHTML='<div style="padding:3px;opacity:.3"><div style="height:2px;background:#aaa;margin:3px 2px;border-radius:1px"></div><div style="height:2px;background:#aaa;margin:3px 2px;width:70%;border-radius:1px"></div></div>';
+    bg.appendChild(p);
+  }
+
+  // ── Dust puffs on the floor ───────────────────────────────────────────────
+  [[4,82],[14,90],[24,85],[76,80],[88,92],[95,76],[50,95],[36,88]].forEach(([x,y],i)=>{
+    const d = document.createElement('div');
+    d.className = 'dust-puff';
+    const sz = 70+Math.random()*80;
+    Object.assign(d.style,{
+      left:x+'%', bottom:(100-y)+'%',
+      width:sz+'px', height:(sz*.55)+'px',
+      animationDuration:(4+Math.random()*4)+'s',
+      animationDelay:(i*1.6+Math.random()*3)+'s',
+    });
+    bg.appendChild(d);
+  });
+
+  // ── Scattered trash on floor ──────────────────────────────────────────────
+  for (let i=0;i<10;i++) {
+    const t = document.createElement('div');
+    t.className = 'trash-item';
+    t.textContent = TRASH_ICONS[Math.floor(Math.random()*TRASH_ICONS.length)];
+    Object.assign(t.style,{
+      left:(8+Math.random()*84)+'%',
+      top:(30+Math.random()*60)+'%',
+      fontSize:(18+Math.random()*18)+'px',
+      animationDuration:(5+Math.random()*6)+'s',
+      animationDelay:(Math.random()*14)+'s',
+      transform:`rotate(${Math.random()*50-25}deg)`,
+    });
+    bg.appendChild(t);
+  }
+
+  // Start BoBo
+  if (!boboRunning) launchBoBo();
+}
+
+function launchBoBo() {
+  const s = document.getElementById('boboWrap');
+  if (!s) return;
+  boboRunning = true;
+
+  const PAD = 20;
+  const SW  = 100;
+  const SH  = 150;
+
+  // Start bottom-left, walking right, fully visible
+  boboX     = PAD;
+  boboY     = window.innerHeight - SH - PAD - 10;
+  boboPhase = 0;
+  s.style.left      = boboX+'px';
+  s.style.top       = boboY+'px';
+  s.style.transform = 'scaleX(1)';
+  s.style.display   = 'block';
+  s.classList.remove('bobo-dance');
+
+  walkStep();
+}
+
+function walkStep() {
+  const s   = document.getElementById('boboWrap');
+  const bg  = document.getElementById('sceneBg');
+  if (!s) return;
+
+  const PAD  = 20;
+  const SW   = 100;
+  const SH   = 150;
+  const SPD  = 2.2;
+  const W    = window.innerWidth;
+  const H    = window.innerHeight;
+
+  function step() {
+    // Occasionally zap a nearby item
+    if (Math.random() < 0.012 && bg) {
+      const items = [...bg.querySelectorAll('.trash-item,.paper')].filter(el=>!el.classList.contains('poofing'));
+      if (items.length) poofItem(items[Math.floor(Math.random()*items.length)]);
+    }
+
+    switch(boboPhase) {
+      case 0: // → walking right along bottom
+        boboX += SPD;
+        s.style.transform = 'scaleX(1)';
+        if (boboX >= W - SW - PAD) boboPhase = 1;
+        break;
+      case 1: // ↑ walking up right side
+        boboY -= SPD * .8;
+        s.style.transform = 'scaleX(1)';
+        if (boboY <= PAD + 50) boboPhase = 2;
+        break;
+      case 2: // ← walking left along top
+        boboX -= SPD;
+        s.style.transform = 'scaleX(-1)';
+        if (boboX <= PAD) boboPhase = 3;
+        break;
+      case 3: // ↓ walking down left side
+        boboY += SPD * .8;
+        s.style.transform = 'scaleX(-1)';
+        if (boboY >= H - SH - PAD - 10) {
+          // Full lap done — now do BIG CLEAN!
+          doBigClean();
+          return;
+        }
+        break;
+    }
+
+    s.style.left = boboX+'px';
+    s.style.top  = boboY+'px';
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function poofItem(el) {
+  if (!el || el.classList.contains('poofing')) return;
+  el.classList.add('poofing');
+  setTimeout(()=>el.remove(), 380);
+}
+
+function doBigClean() {
+  const s      = document.getElementById('boboWrap');
+  const bubble = document.getElementById('boboBubble');
+  const flash  = document.getElementById('cleanFlash');
+  const bg     = document.getElementById('sceneBg');
+
+  // Move BoBo to screen center
+  const cx = window.innerWidth/2  - 50;
+  const cy = window.innerHeight/2 - 75;
+  s.style.transition = 'left .6s ease, top .6s ease, transform .6s ease';
+  s.style.left      = cx+'px';
+  s.style.top       = cy+'px';
+  s.style.transform = 'scaleX(1) scale(1.25)';
+
+  // Show "Cleaning! 🧹"
+  setTimeout(()=>{
+    s.style.transition = '';
+    if (bubble) { bubble.textContent='Cleaning! 🤖'; bubble.classList.add('show'); }
+    if (flash)  flash.classList.add('active');
+
+    // Poof ALL remaining items fast
+    const items = bg ? [...bg.querySelectorAll('.trash-item,.paper,.dust-puff')] : [];
+    items.forEach((el,i)=>setTimeout(()=>poofItem(el), i*60));
+
+    // After all poofed — celebrate!
+    setTimeout(()=>{
+      if (flash) flash.classList.remove('active');
+
+      // Move BoBo to RIGHT side of screen for "Done!" pose
+      const rx = window.innerWidth - 200;
+      const ry = window.innerHeight - 260;
+      s.style.transition = 'left .8s ease, top .8s ease, transform .5s ease';
+      s.style.left  = rx+'px';
+      s.style.top   = ry+'px';
+      s.style.transform = 'scaleX(-1) scale(1.3)';
+
+      setTimeout(()=>{
+        s.style.transition = '';
+        if (bubble) { bubble.textContent = '✅ Done with cleaning!'; bubble.classList.add('show'); }
+      }, 850);
+
+      // Happy dance
+      s.classList.add('bobo-dance');
+
+      // After 2.5s — fade out, restart whole scene
+      setTimeout(()=>{
+        if (bubble) bubble.classList.remove('show');
+        s.style.transition = 'opacity .8s ease';
+        s.style.opacity    = '0';
+        setTimeout(()=>{
+          s.style.transition = '';
+          s.style.opacity    = '1';
+          s.classList.remove('bobo-dance');
+          boboRunning = false;
+          initScene();
+        }, 900);
+      }, 2500);
+
+    }, items.length*60 + 700);
+  }, 700);
+}
+
+document.addEventListener('DOMContentLoaded', initScene);
+window.addEventListener('resize', ()=>{ boboRunning=false; });
+setInterval(refreshAC, 30000);
+setInterval(drawTrend, 60000);
+setInterval(()=>{api('/drives').then(d=>{drives=d;renderDrives();renderStats();}).catch(()=>{})},60000);
+</script>
+</body>
+</html>

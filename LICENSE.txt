@@ -1,0 +1,29 @@
+CleanClicks v3.0 — License Agreement
+=====================================
+
+Copyright © 2025 AK CleanClicks. All rights reserved.
+
+FREEWARE LICENSE
+
+CleanClicks is free software distributed at no cost.
+
+You are free to:
+  ✓ Use CleanClicks on any Windows PC
+  ✓ Copy and share CleanClicks with friends and family
+  ✓ Install CleanClicks on multiple machines
+
+You may NOT:
+  ✗ Sell CleanClicks or charge money for it
+  ✗ Modify and redistribute as your own product
+  ✗ Remove this license or credits
+
+DISCLAIMER:
+CleanClicks is provided "as is" without warranty of any kind.
+The authors are not responsible for any data loss. Always back
+up important files before running any cleaning tool.
+
+CleanClicks contains NO malware, NO adware, NO spyware,
+NO telemetry, and makes NO internet connections.
+Everything runs 100% locally on your machine.
+
+By installing CleanClicks you agree to these terms.
