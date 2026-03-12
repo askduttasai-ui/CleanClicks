@@ -1,4 +1,4 @@
-# 🔐 CleanClicks v3.1 — Security Guide
+# 🔐 CleanClicks v3.3 — Security Guide
 
 ## Protection Against Hackers
 
@@ -28,7 +28,8 @@ Any request from an external IP is blocked with HTTP 403.
 Only these origins can call the API:
 - http://localhost:5050
 - http://127.0.0.1:5050
-All other origins are blocked.
+
+All other origins are permanently blocked.
 
 ### 4. File Integrity Check
 On every startup, CleanClicks computes a SHA-256 hash of its own
@@ -56,8 +57,8 @@ Your documents, photos, and data are never accessed.
 ## 🔍 For Open Source Verification
 
 CleanClicks is open source. You can verify every line of code:
-- cleaner_backend.py   — The complete Python backend
-- cleanclicks.html     — The complete frontend
+- `cleaner_backend.py`  — The complete Python backend
+- `cleanclicks.html`    — The complete frontend (10 tabs)
 - No obfuscation, no minification, no hidden code
 
 Anyone can audit, verify, and trust CleanClicks.
@@ -67,12 +68,23 @@ Anyone can audit, verify, and trust CleanClicks.
 ## 📋 Security Checklist for Distribution
 
 Before sharing CleanClicks_Setup.exe:
-- [ ] Run build_exe.bat to build fresh EXE
-- [ ] Run build_installer.bat to wrap in installer
-- [ ] Check cleanclicks_integrity.sha256 matches your build
+- [ ] Run `build_exe.bat` to build fresh EXE
+- [ ] Run `build_installer.bat` to wrap in installer
+- [ ] Check `cleanclicks_integrity.sha256` matches your build
 - [ ] Apply for SignPath Foundation certificate (free, see README)
 - [ ] Upload source to GitHub for public audit
 
 ---
 
-CleanClicks v3.1 — Secure, Free, Open Source
+## 🆕 What's New in v3.3
+
+- RAM Optimizer tab added — live stats + one-click optimization
+- Port updated to 5050 (resolves svchost conflict on some PCs)
+- Scan engine now correctly detects real user home under Windows Service
+- Large file scan has 25-second hard timeout to prevent hangs
+- Build scripts no longer contain hardcoded usernames
+
+---
+
+CleanClicks v3.3 — Secure, Free, Open Source  
+© 2026 AK CleanClicks — https://cleanclicks.netlify.app

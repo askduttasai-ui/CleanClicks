@@ -3,7 +3,7 @@
 # 🤖 CleanClicks
 ### Your PC's Best Friend — Free Forever
 
-![Version](https://img.shields.io/badge/version-3.2-orange?style=flat-square)
+![Version](https://img.shields.io/badge/version-3.3-orange?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 ![Publisher](https://img.shields.io/badge/publisher-AK%20CleanClicks-orange?style=flat-square)
@@ -32,6 +32,7 @@ BoBo is CleanClicks' friendly robot mascot. He walks around your screen in the b
 | Startup Manager | ✅ | ✅ | ✅ |
 | Large File Finder | ✅ | ❌ | ✅ |
 | Privacy Cleaner | ✅ | ✅ | ✅ |
+| **RAM Optimizer** | ✅ New v3.3 | ❌ paid | ✅ |
 | **Auto-Clean every 5 min** | ✅ | ❌ paid | ❌ |
 | **PC Health Score A–F** | ✅ | ❌ | ❌ |
 | **Disk Space Trend Chart** | ✅ | ❌ | ❌ |
@@ -50,16 +51,15 @@ BoBo is CleanClicks' friendly robot mascot. He walks around your screen in the b
 1. Download `CleanClicks_Setup.exe` from [Releases](../../releases)
 2. Double-click it
 3. Click **Next → I Agree → Install → Finish**
-4. Desktop shortcut created automatically ✅
+4. Check **"Launch CleanClicks now"** — browser opens automatically ✅
 
 > **Windows SmartScreen warning?** Click **"More info"** → **"Run anyway"**
 > This is safe — CleanClicks is open source and contains no malware.
 
 ### Option B — Portable (No Install)
-1. Download `CleanClicks_Portable.zip` from [Releases](../../releases)
-2. Extract anywhere
-3. Double-click `CleanClicks.exe`
-4. Browser opens automatically ✅
+1. Download `CleanClicks.exe` from [Releases](../../releases)
+2. Double-click it
+3. Browser opens automatically at http://localhost:5050 ✅
 
 ---
 
@@ -82,31 +82,28 @@ See [SECURITY.md](SECURITY.md) for full details.
 
 ### Requirements
 - Windows 10/11
-- Python 3.10+
+- Python 3.11
 - pip
 
 ### Steps
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/cleanclicks.git
-cd cleanclicks
+git clone https://github.com/askduttasai-ui/CleanClicks.git
+cd CleanClicks
 
 # Install dependencies
-pip install flask flask-cors waitress pywin32
+pip install flask flask-cors waitress pywin32 psutil
 
 # Run directly
 python cleaner_backend.py
 
 # Open in browser
-start cleanclicks.html
+start http://localhost:5050
 ```
 
 ### Build the EXE
 ```bash
-# Install build tools
-pip install pyinstaller pillow
-
-# Build
+# Build EXE (auto-detects Python 3.11)
 build_exe.bat
 
 # Build installer
@@ -118,16 +115,17 @@ build_installer.bat
 ## 📁 Project Structure
 
 ```
-cleanclicks/
-├── cleanclicks.html          # Frontend UI
+CleanClicks/
+├── cleanclicks.html          # Frontend UI (10 tabs)
 ├── cleaner_backend.py        # Flask API backend
 ├── cleanclicks_launcher.py   # EXE launcher
 ├── cleanclicks_service.py    # Windows Service wrapper
 ├── build_exe.bat             # Builds CleanClicks.exe
 ├── build_installer.bat       # Builds CleanClicks_Setup.exe
+├── CleanClicks_Installer.nsi # NSIS installer script
 ├── create_icon.py            # Generates app icon
 ├── create_banner.py          # Generates installer banner
-├── install.bat               # One-click installer
+├── install.bat               # One-click service installer
 ├── uninstall.bat             # Clean removal
 ├── service_manager.bat       # Start/Stop/Restart service
 ├── LICENSE.txt               # MIT License
@@ -150,18 +148,19 @@ cleanclicks/
 - [x] Secure File Shredder (DoD/Gutmann)
 - [x] Registry Cleaner
 - [x] Live System Monitor
+- [x] RAM Optimizer ✅ New in v3.3
 - [x] BoBo robot mascot animation
-- [x] Security hardening
-- [ ] RAM Optimizer
+- [x] Security hardening (7 layers)
+- [ ] RAM high usage notifications
 - [ ] Auto-updater
-- [ ] Website — cleanclicks.app
 - [ ] Code signing certificate (SignPath Foundation)
+- [ ] CleanClicks Mobile (Android)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome!
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -175,7 +174,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 MIT License — see [LICENSE.txt](LICENSE.txt) for details.
 
-© 2025 AK CleanClicks — Free forever.
+© 2026 AK CleanClicks — Free forever.
 
 ---
 
@@ -183,7 +182,7 @@ MIT License — see [LICENSE.txt](LICENSE.txt) for details.
 
 - 🐛 **Bug reports:** [Open an issue](../../issues)
 - 💡 **Feature requests:** [Open an issue](../../issues)
-- 📧 **Contact:** Open an issue and we'll respond!
+- 🌐 **Website:** [cleanclicks.netlify.app](https://cleanclicks.netlify.app)
 
 <div align="center">
 
