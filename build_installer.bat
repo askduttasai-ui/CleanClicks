@@ -34,10 +34,9 @@ if exist "C:\Program Files\NSIS\makensis.exe" set MAKENSIS=C:\Program Files\NSIS
 
 if defined MAKENSIS (
     echo  NSIS found.
-    goto :icon
+    goto :makefiles
 )
 
-:: NSIS not found - ask user to install manually
 echo.
 echo  NSIS is required to build the installer.
 echo  It is free and takes 1 minute to install.
@@ -51,12 +50,44 @@ start https://nsis.sourceforge.io/Download
 pause
 exit /b 1
 
-:icon
-:: ── Step 2: Icon and banner ───────────────────────────────────────────────────
+:makefiles
+:: ── Step 2: Auto-create required files ───────────────────────────────────────
 echo.
-echo [2/4] Creating graphics...
-if not exist "cleanclicks.ico" python create_icon.py
-python create_banner.py
+echo [2/4] Creating required files...
+
+if not exist "LICENSE.txt" (
+    (echo MIT License
+     echo.
+     echo Copyright ^(c^) 2025 AK CleanClicks
+     echo.
+     echo Permission is hereby granted, free of charge, to any person obtaining a copy
+     echo of this software and associated documentation files, to deal in the Software
+     echo without restriction, including without limitation the rights to use, copy,
+     echo modify, merge, publish, distribute, sublicense, and/or sell copies of the
+     echo Software, and to permit persons to whom the Software is furnished to do so.
+     echo.
+     echo THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+    ) > LICENSE.txt
+    echo  LICENSE.txt created.
+) else ( echo  LICENSE.txt found. )
+
+if not exist "README.txt" (
+    (echo CleanClicks v3.3 - Free PC Cleaner
+     echo Publisher: AK CleanClicks
+     echo Website: https://cleanclicks.netlify.app
+     echo.
+     echo Double-click CleanClicks.exe to launch.
+     echo Browser opens at http://localhost:5050
+    ) > README.txt
+    echo  README.txt created.
+) else ( echo  README.txt found. )
+
+if not exist "cleanclicks.ico" (
+    python create_icon.py
+    if exist "cleanclicks.ico" ( echo  Icon created. ) else ( echo  [WARNING] No icon found - using default. )
+) else ( echo  cleanclicks.ico found. )
+
+if exist "create_banner.py" python create_banner.py
 echo  Done.
 
 :: ── Step 3: Clean old installer ──────────────────────────────────────────────
@@ -90,11 +121,12 @@ echo   SUCCESS! CleanClicks_Setup.exe is ready!
 echo.
 echo   Size: %MB% MB
 echo.
-echo   Send this ONE file to your friend:
-echo   CleanClicks_Setup.exe
+echo   Send this ONE file to your friends:
+echo     CleanClicks_Setup.exe
 echo.
 echo   They just double-click and follow:
-echo   Next - I Agree - Install - Finish
+echo     Next - I Agree - Install - Finish
+echo   "Launch CleanClicks now" checkbox will appear!
 echo   Desktop shortcut created automatically!
 echo  ====================================================
 echo.

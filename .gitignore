@@ -1,0 +1,28 @@
+# ── Build outputs ─────────────────────────────────────────────
+dist/
+build/
+*.spec
+CleanClicks_Setup.exe
+
+# ── PyInstaller ───────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+
+# ── App data files (contain your PC's personal data) ─────────
+*.json
+*.log
+*.sha256
+
+# ── Build graphics (auto-generated) ──────────────────────────
+cleanclicks.ico
+banner.bmp
+
+# ── Windows junk ─────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+
+# ── Sensitive ────────────────────────────────────────────────
+*.token
+*.key
+*.env

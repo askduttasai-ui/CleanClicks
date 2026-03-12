@@ -119,7 +119,7 @@ TREND_FILE   = BASE_DIR / "cleanclicks_disk_trend.json"
 
 # ─── Globals ──────────────────────────────────────────────────────────────────
 auto_clean_active   = True
-auto_clean_interval = 300          # seconds
+auto_clean_interval = 600          # seconds (default: 10 minutes)
 last_clean_time     = None
 last_clean_freed    = 0
 history             = []
@@ -1159,6 +1159,209 @@ def api_system_monitor():
         "processes": procs,
         "timestamp": time.time()
     })
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RAM OPTIMIZER
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Store RAM trend in memory (last 30 readings = ~30 minutes at 1/min)
+ram_trend = []
+ram_trend_lock = threading.Lock()
+
+def record_ram_snapshot():
+    """Record current RAM usage for trend chart."""
+    global ram_trend
+    try:
+        info = get_ram_info()
+        snapshot = {
+            "timestamp": datetime.now().strftime("%H:%M"),
+            "pct":       info["pct"],
+            "used_gb":   round(info["used"] / (1024**3), 2),
+            "free_gb":   round(info["free"] / (1024**3), 2),
+        }
+        with ram_trend_lock:
+            ram_trend.append(snapshot)
+            ram_trend = ram_trend[-30:]  # keep last 30
+    except Exception:
+        pass
+
+def optimize_ram_windows():
+    """
+    Flush Windows standby memory list using RAMMap-style technique.
+    Uses EmptyWorkingSet on all accessible processes via Windows API.
+    Returns MB freed estimate.
+    """
+    freed_bytes = 0
+    try:
+        import ctypes
+        import ctypes.wintypes
+
+        PROCESS_ALL_ACCESS        = 0x1F0FFF
+        PROCESS_QUERY_INFORMATION = 0x0400
+        PROCESS_SET_QUOTA         = 0x0100
+
+        kernel32 = ctypes.windll.kernel32
+        psapi    = ctypes.windll.psapi
+
+        # Snapshot RAM before
+        before = get_ram_info()
+
+        # Get list of all PIDs via EnumProcesses
+        arr = (ctypes.wintypes.DWORD * 1024)()
+        cb  = ctypes.wintypes.DWORD(0)
+        psapi.EnumProcesses(ctypes.byref(arr), ctypes.sizeof(arr), ctypes.byref(cb))
+        count = cb.value // ctypes.sizeof(ctypes.wintypes.DWORD)
+
+        emptied = 0
+        for i in range(count):
+            pid = arr[i]
+            if pid == 0:
+                continue
+            try:
+                h = kernel32.OpenProcess(
+                    PROCESS_QUERY_INFORMATION | PROCESS_SET_QUOTA, False, pid)
+                if h:
+                    psapi.EmptyWorkingSet(h)
+                    kernel32.CloseHandle(h)
+                    emptied += 1
+            except Exception:
+                pass
+
+        # Also flush file system cache via SetSystemFileCacheSize
+        try:
+            kernel32.SetSystemFileCacheSize(
+                ctypes.c_size_t(0xFFFFFFFF),
+                ctypes.c_size_t(0xFFFFFFFF),
+                0
+            )
+        except Exception:
+            pass
+
+        # Snapshot RAM after
+        import time as _time
+        _time.sleep(1)
+        after  = get_ram_info()
+        freed_bytes = max(0, before["used"] - after["used"])
+
+        return {
+            "success":      True,
+            "freed_bytes":  freed_bytes,
+            "freed_mb":     round(freed_bytes / (1024**2), 1),
+            "before_pct":   before["pct"],
+            "after_pct":    after["pct"],
+            "processes_emptied": emptied,
+        }
+
+    except Exception as e:
+        return {
+            "success":     False,
+            "error":       str(e),
+            "freed_bytes": 0,
+            "freed_mb":    0,
+        }
+
+def get_top_processes_detailed():
+    """Top 15 processes with PID, name, memory — for RAM optimizer."""
+    try:
+        result = subprocess.run(
+            ["wmic", "process", "get", "ProcessId,Name,WorkingSetSize", "/value"],
+            capture_output=True, text=True, timeout=6,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+        procs = {}
+        pid = name = None
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if line.startswith("Name="):
+                name = line.split("=", 1)[1].strip()
+            elif line.startswith("ProcessId="):
+                try:
+                    pid = int(line.split("=", 1)[1].strip())
+                except Exception:
+                    pid = None
+            elif line.startswith("WorkingSetSize=") and name and pid:
+                try:
+                    size = int(line.split("=", 1)[1].strip())
+                    key = (pid, name)
+                    procs[key] = procs.get(key, 0) + size
+                except Exception:
+                    pass
+                name = pid = None
+
+        sorted_procs = sorted(procs.items(), key=lambda x: x[1], reverse=True)[:15]
+        # Mark system-critical processes as non-killable
+        SAFE_TO_KILL = {"chrome.exe","firefox.exe","msedge.exe","opera.exe",
+                        "notepad.exe","notepad++.exe","vlc.exe","winrar.exe",
+                        "7zfm.exe","spotify.exe","discord.exe","slack.exe",
+                        "code.exe","pycharm64.exe","idea64.exe"}
+        result_list = []
+        for (pid, name), mem in sorted_procs:
+            result_list.append({
+                "pid":       pid,
+                "name":      name,
+                "memory":    mem,
+                "memory_mb": round(mem / (1024**2), 1),
+                "killable":  name.lower() in SAFE_TO_KILL,
+            })
+        return result_list
+    except Exception:
+        return []
+
+def kill_process(pid: int):
+    """Kill a process by PID using taskkill."""
+    try:
+        result = subprocess.run(
+            ["taskkill", "/PID", str(pid), "/F"],
+            capture_output=True, text=True, timeout=5,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+        success = result.returncode == 0
+        return {"success": success, "message": result.stdout.strip() or result.stderr.strip()}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+@app.route("/api/ram/status")
+def api_ram_status():
+    """Live RAM stats + top processes for the RAM Optimizer tab."""
+    record_ram_snapshot()
+    ram   = get_ram_info()
+    procs = get_top_processes_detailed()
+    with ram_trend_lock:
+        trend = list(ram_trend)
+    return jsonify({
+        "ram":       ram,
+        "ram_gb":    round(ram["used"]  / (1024**3), 2),
+        "free_gb":   round(ram["free"]  / (1024**3), 2),
+        "total_gb":  round(ram["total"] / (1024**3), 2),
+        "processes": procs,
+        "trend":     trend,
+        "timestamp": datetime.now().strftime("%H:%M:%S"),
+    })
+
+@app.route("/api/ram/optimize", methods=["POST"])
+def api_ram_optimize():
+    """Run RAM optimization — flush working sets and file cache."""
+    result = optimize_ram_windows()
+    # Record snapshot after optimization
+    record_ram_snapshot()
+    return jsonify(result)
+
+@app.route("/api/ram/kill", methods=["POST"])
+def api_ram_kill():
+    """Kill a process by PID."""
+    data = request.json or {}
+    pid  = data.get("pid")
+    name = data.get("name", "")
+    if not pid:
+        return jsonify({"success": False, "message": "No PID provided"}), 400
+    # Safety: block killing system-critical processes
+    BLOCKED = {"system","smss.exe","csrss.exe","wininit.exe","winlogon.exe",
+               "lsass.exe","services.exe","svchost.exe","explorer.exe",
+               "cleanclicks","python.exe","pythonw.exe"}
+    if name.lower() in BLOCKED:
+        return jsonify({"success": False, "message": f"Cannot kill system process: {name}"}), 403
+    result = kill_process(pid)
+    return jsonify(result)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STARTUP

@@ -1,145 +1,131 @@
 ; ============================================================
-;  CleanClicks v3.0 — Professional Windows Installer
-;  Built with NSIS (Nullsoft Scriptable Install System)
-;  Same technology used by VLC, 7-Zip, WinRAR
+;  CleanClicks Professional Installer
+;  Built with NSIS — https://nsis.sourceforge.io
+;  Publisher: AK CleanClicks  |  Version: 3.3
+;  Port: 5050
 ; ============================================================
 
 !include "MUI2.nsh"
-!include "LogicLib.nsh"
 !include "FileFunc.nsh"
 
-; ── App Info ─────────────────────────────────────────────────
-!define APPNAME        "CleanClicks"
-!define VERSION        "3.0"
-!define PUBLISHER      "AK CleanClicks"
-!define DESCRIPTION    "Your PC's Best Friend — Free PC Cleaner"
-!define WEBSITE        "https://github.com/cleanclicks"
-!define INSTALLDIR     "$PROGRAMFILES\CleanClicks"
-!define UNINSTKEY      "Software\Microsoft\Windows\CurrentVersion\Uninstall\CleanClicks"
-!define REGKEY         "Software\CleanClicks"
-!define MAINEXE        "CleanClicks.exe"
-!define LAUNCHEXE      "CleanClicks.exe"
-
-; ── Installer Settings ───────────────────────────────────────
-Name              "${APPNAME} ${VERSION}"
+; ── Basic Info ──────────────────────────────────────────────
+Name              "CleanClicks"
 OutFile           "CleanClicks_Setup.exe"
-InstallDir        "${INSTALLDIR}"
-InstallDirRegKey  HKLM "${REGKEY}" "InstallDir"
+InstallDir        "$PROGRAMFILES\CleanClicks"
+InstallDirRegKey  HKLM "Software\CleanClicks" "Install_Dir"
 RequestExecutionLevel admin
-SetCompressor     /SOLID lzma
-CRCCheck          on
-ShowInstDetails   show
-ShowUninstDetails show
+Unicode True
 
-; ── Modern UI Settings ───────────────────────────────────────
+; ── Version Info (shows in EXE properties) ──────────────────
+VIProductVersion  "3.3.0.0"
+VIAddVersionKey   "ProductName"      "CleanClicks"
+VIAddVersionKey   "CompanyName"      "AK CleanClicks"
+VIAddVersionKey   "LegalCopyright"   "Copyright 2025 AK CleanClicks"
+VIAddVersionKey   "FileDescription"  "CleanClicks PC Cleaner Setup"
+VIAddVersionKey   "FileVersion"      "3.3.0.0"
+VIAddVersionKey   "ProductVersion"   "3.3.0.0"
+
+; ── Constants ───────────────────────────────────────────────
+!define APPNAME    "CleanClicks"
+!define APPVERSION "3.3"
+!define PUBLISHER  "AK CleanClicks"
+!define WEBSITE    "https://cleanclicks.netlify.app"
+!define UNINSTKEY  "Software\Microsoft\Windows\CurrentVersion\Uninstall\CleanClicks"
+!define REGKEY     "Software\CleanClicks"
+
+; ── MUI Settings ────────────────────────────────────────────
 !define MUI_ABORTWARNING
-!define MUI_ICON                    "cleanclicks.ico"
-!define MUI_UNICON                  "cleanclicks.ico"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "installer_banner.bmp"
 
-; Header colors (blue theme)
-!define MUI_HEADERIMAGE
-!define MUI_BGCOLOR                 "FFFFFF"
-!define MUI_HEADER_TRANSPARENT_TEXT ""
+; App icon used in installer window title bar + Control Panel
+!define MUI_ICON   "cleanclicks.ico"
+!define MUI_UNICON "cleanclicks.ico"
 
 ; Welcome page
-!define MUI_WELCOMEPAGE_TITLE       "Welcome to CleanClicks ${VERSION}"
-!define MUI_WELCOMEPAGE_TEXT        "CleanClicks is your PC's best friend.$\r$\n$\r$\nIt automatically cleans temp files, finds duplicates, shreds sensitive files, monitors your system, and keeps your PC running fast.$\r$\n$\r$\nThis wizard will install CleanClicks ${VERSION} on your computer.$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TITLE "Welcome to CleanClicks v3.3"
+!define MUI_WELCOMEPAGE_TEXT  "CleanClicks is your free, powerful PC cleaner.$\r$\n$\r$\nFeatures include:$\r$\n  • Temp & Cache Cleaner$\r$\n  • Duplicate File Finder$\r$\n  • Startup Manager$\r$\n  • Large File Finder$\r$\n  • Privacy Cleaner$\r$\n  • Auto-Clean Scheduler$\r$\n  • Secure File Shredder$\r$\n  • Registry Cleaner$\r$\n  • Live System Monitor$\r$\n  • RAM Optimizer$\r$\n$\r$\nClick Next to continue."
 
-; Finish page
-!define MUI_FINISHPAGE_TITLE        "CleanClicks is Ready!"
-!define MUI_FINISHPAGE_TEXT         "CleanClicks has been installed successfully.$\r$\n$\r$\nClick Finish to launch CleanClicks now."
-!define MUI_FINISHPAGE_RUN          "$INSTDIR\${LAUNCHEXE}"
-!define MUI_FINISHPAGE_RUN_TEXT     "Launch CleanClicks now"
-!define MUI_FINISHPAGE_LINK         "Visit CleanClicks website"
-!define MUI_FINISHPAGE_LINK_LOCATION "${WEBSITE}"
+; ── Finish page with LAUNCH CHECKBOX ────────────────────────
+!define MUI_FINISHPAGE_TITLE            "CleanClicks Installed Successfully!"
+!define MUI_FINISHPAGE_TEXT             "CleanClicks v3.3 has been installed.$\r$\n$\r$\nClick Finish to complete setup."
+!define MUI_FINISHPAGE_RUN              "$INSTDIR\CleanClicks.exe"
+!define MUI_FINISHPAGE_RUN_TEXT         "Launch CleanClicks now"
+!define MUI_FINISHPAGE_RUN_CHECKED                          ; ticked by default ✅
+!define MUI_FINISHPAGE_LINK             "Visit CleanClicks Website"
+!define MUI_FINISHPAGE_LINK_LOCATION    "${WEBSITE}"
 
 ; ── Pages ────────────────────────────────────────────────────
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE        "LICENSE.txt"
+!insertmacro MUI_PAGE_LICENSE    "LICENSE.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
-; Uninstaller pages
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
-; ── Language ─────────────────────────────────────────────────
 !insertmacro MUI_LANGUAGE "English"
-
-; ── Version Info (shows in file properties) ──────────────────
-VIProductVersion                    "3.0.0.0"
-VIAddVersionKey "ProductName"       "${APPNAME}"
-VIAddVersionKey "ProductVersion"    "${VERSION}"
-VIAddVersionKey "CompanyName"       "AK CleanClicks"
-VIAddVersionKey "FileDescription"   "${DESCRIPTION}"
-VIAddVersionKey "FileVersion"       "${VERSION}"
-VIAddVersionKey "LegalCopyright"    "© 2025 AK CleanClicks"
 
 ; ============================================================
 ;  INSTALL SECTION
 ; ============================================================
 Section "CleanClicks" SecMain
 
-    SectionIn RO   ; Required — can't be deselected
+  SectionIn RO   ; Cannot be deselected
 
-    SetOutPath "$INSTDIR"
-    SetOverwrite on
+  SetOutPath "$INSTDIR"
 
-    ; ── Copy all application files ────────────────────────────
-    File "dist\CleanClicks.exe"
-    File "cleanclicks.html"
-    File "cleaner_backend.py"
-    File "cleanclicks_launcher.py"
-    File "cleanclicks_service.py"
-    File "README.txt"
+  ; ── Copy application files ────────────────────────────────
+  File "dist\CleanClicks.exe"
+  File "cleanclicks.html"
+  File "cleaner_backend.py"
+  File "cleanclicks_service.py"
+  File "cleanclicks_launcher.py"
+  File /nonfatal "README.txt"
+  File /nonfatal "LICENSE.txt"
 
-    ; ── Write registry entries ────────────────────────────────
-    WriteRegStr   HKLM "${REGKEY}" "InstallDir"    "$INSTDIR"
-    WriteRegStr   HKLM "${REGKEY}" "Version"       "${VERSION}"
+  ; ── Copy icon (required for Control Panel) ────────────────
+  ; If icon missing, create a blank placeholder so installer doesn't fail
+  File /nonfatal "cleanclicks.ico"
 
-    ; ── Add to Windows Programs & Features (Add/Remove) ──────
-    WriteRegStr   HKLM "${UNINSTKEY}" "DisplayName"          "${APPNAME}"
-    WriteRegStr   HKLM "${UNINSTKEY}" "DisplayVersion"       "${VERSION}"
-    WriteRegStr   HKLM "${UNINSTKEY}" "Publisher"            "${PUBLISHER}"
-    WriteRegStr   HKLM "${UNINSTKEY}" "DisplayIcon"          "$INSTDIR\${MAINEXE}"
-    WriteRegStr   HKLM "${UNINSTKEY}" "InstallLocation"      "$INSTDIR"
-    WriteRegStr   HKLM "${UNINSTKEY}" "UninstallString"      "$INSTDIR\Uninstall.exe"
-    WriteRegStr   HKLM "${UNINSTKEY}" "HelpLink"             "${WEBSITE}"
-    WriteRegStr   HKLM "${UNINSTKEY}" "URLInfoAbout"         "${WEBSITE}"
-    WriteRegDWORD HKLM "${UNINSTKEY}" "NoModify"             1
-    WriteRegDWORD HKLM "${UNINSTKEY}" "NoRepair"             1
+  ; ── Write uninstall registry entry ───────────────────────
+  WriteRegStr   HKLM "${UNINSTKEY}" "DisplayName"          "${APPNAME}"
+  WriteRegStr   HKLM "${UNINSTKEY}" "DisplayVersion"       "${APPVERSION}"
+  WriteRegStr   HKLM "${UNINSTKEY}" "Publisher"            "${PUBLISHER}"
+  WriteRegStr   HKLM "${UNINSTKEY}" "URLInfoAbout"         "${WEBSITE}"
+  WriteRegStr   HKLM "${UNINSTKEY}" "HelpLink"             "${WEBSITE}"
+  WriteRegStr   HKLM "${UNINSTKEY}" "UninstallString"      '"$INSTDIR\Uninstall.exe"'
+  WriteRegStr   HKLM "${UNINSTKEY}" "QuietUninstallString" '"$INSTDIR\Uninstall.exe" /S'
+  WriteRegStr   HKLM "${UNINSTKEY}" "InstallLocation"      "$INSTDIR"
+  WriteRegDWORD HKLM "${UNINSTKEY}" "NoModify"             1
+  WriteRegDWORD HKLM "${UNINSTKEY}" "NoRepair"             1
 
-    ; Estimated size (fixed 50MB)
-    WriteRegDWORD HKLM "${UNINSTKEY}" "EstimatedSize" 51200
+  ; ── THIS IS WHAT MAKES THE ICON SHOW IN CONTROL PANEL ────
+  WriteRegStr   HKLM "${UNINSTKEY}" "DisplayIcon"  "$INSTDIR\cleanclicks.ico"
 
-    ; ── Create Desktop Shortcut ───────────────────────────────
-    CreateShortcut "$DESKTOP\CleanClicks.lnk" \
-                   "$INSTDIR\${MAINEXE}" "" \
-                   "$INSTDIR\${MAINEXE}" 0 \
-                   SW_SHOWNORMAL "" \
-                   "${DESCRIPTION}"
+  ; ── Estimated install size (KB) ──────────────────────────
+  WriteRegDWORD HKLM "${UNINSTKEY}" "EstimatedSize" 51200
 
-    ; ── Create Start Menu Shortcut ────────────────────────────
-    CreateDirectory "$SMPROGRAMS\CleanClicks"
-    CreateShortcut  "$SMPROGRAMS\CleanClicks\CleanClicks.lnk" \
-                    "$INSTDIR\${MAINEXE}" "" \
-                    "$INSTDIR\${MAINEXE}" 0
-    CreateShortcut  "$SMPROGRAMS\CleanClicks\Uninstall CleanClicks.lnk" \
-                    "$INSTDIR\Uninstall.exe"
+  ; ── App install location registry ────────────────────────
+  WriteRegStr HKLM "${REGKEY}" "Install_Dir" "$INSTDIR"
+  WriteRegStr HKLM "${REGKEY}" "Version"     "${APPVERSION}"
 
-    ; ── Write uninstaller ─────────────────────────────────────
-    WriteUninstaller "$INSTDIR\Uninstall.exe"
+  ; ── Desktop shortcut ─────────────────────────────────────
+  CreateShortcut "$DESKTOP\CleanClicks.lnk" \
+    "$INSTDIR\CleanClicks.exe" "" \
+    "$INSTDIR\cleanclicks.ico" 0 \
+    SW_SHOWNORMAL "" \
+    "CleanClicks PC Cleaner"
 
-SectionEnd
+  ; ── Start Menu shortcuts ──────────────────────────────────
+  CreateDirectory "$SMPROGRAMS\CleanClicks"
+  CreateShortcut  "$SMPROGRAMS\CleanClicks\CleanClicks.lnk" \
+    "$INSTDIR\CleanClicks.exe" "" "$INSTDIR\cleanclicks.ico" 0
+  CreateShortcut  "$SMPROGRAMS\CleanClicks\Uninstall CleanClicks.lnk" \
+    "$INSTDIR\Uninstall.exe"
 
-; ── Optional: Add to Windows Startup (auto-start with Windows) ──
-Section /o "Start with Windows" SecStartup
-    WriteRegStr HKCU \
-        "Software\Microsoft\Windows\CurrentVersion\Run" \
-        "CleanClicks" \
-        "$INSTDIR\${MAINEXE}"
+  ; ── Write uninstaller EXE ────────────────────────────────
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+
 SectionEnd
 
 ; ============================================================
@@ -147,36 +133,39 @@ SectionEnd
 ; ============================================================
 Section "Uninstall"
 
-    ; Stop the process if running
-    ExecWait 'taskkill /f /im ${MAINEXE}' $0
+  ; ── Stop service if running ───────────────────────────────
+  ExecWait 'net stop CleanClicksService'
+  ExecWait 'taskkill /f /im CleanClicks.exe'
 
-    ; Remove files
-    Delete "$INSTDIR\CleanClicks.exe"
-    Delete "$INSTDIR\cleanclicks.html"
-    Delete "$INSTDIR\cleaner_backend.py"
-    Delete "$INSTDIR\cleanclicks_launcher.py"
-    Delete "$INSTDIR\cleanclicks_service.py"
-    Delete "$INSTDIR\README.txt"
-    Delete "$INSTDIR\cleanclicks_history.json"
-    Delete "$INSTDIR\cleanclicks_disk_trend.json"
-    Delete "$INSTDIR\Uninstall.exe"
-    RMDir  "$INSTDIR"
+  ; ── Delete application files ──────────────────────────────
+  Delete "$INSTDIR\CleanClicks.exe"
+  Delete "$INSTDIR\cleanclicks.html"
+  Delete "$INSTDIR\cleaner_backend.py"
+  Delete "$INSTDIR\cleanclicks_service.py"
+  Delete "$INSTDIR\cleanclicks_launcher.py"
+  Delete "$INSTDIR\cleanclicks.ico"
+  Delete "$INSTDIR\README.txt"
+  Delete "$INSTDIR\LICENSE.txt"
+  Delete "$INSTDIR\Uninstall.exe"
 
-    ; Remove shortcuts
-    Delete "$DESKTOP\CleanClicks.lnk"
-    Delete "$SMPROGRAMS\CleanClicks\CleanClicks.lnk"
-    Delete "$SMPROGRAMS\CleanClicks\Uninstall CleanClicks.lnk"
-    RMDir  "$SMPROGRAMS\CleanClicks"
+  ; ── Delete data/log files ─────────────────────────────────
+  Delete "$INSTDIR\cleanclicks_history.json"
+  Delete "$INSTDIR\cleanclicks_disk_trend.json"
+  Delete "$INSTDIR\cleanclicks_autoclean.log"
+  Delete "$INSTDIR\cleanclicks_integrity.sha256"
+  Delete "$INSTDIR\cleanclicks_service.log"
 
-    ; Remove startup entry
-    DeleteRegValue HKCU \
-        "Software\Microsoft\Windows\CurrentVersion\Run" \
-        "CleanClicks"
+  ; ── Remove install folder ─────────────────────────────────
+  RMDir  "$INSTDIR"
 
-    ; Remove registry entries
-    DeleteRegKey HKLM "${UNINSTKEY}"
-    DeleteRegKey HKLM "${REGKEY}"
+  ; ── Remove shortcuts ──────────────────────────────────────
+  Delete "$DESKTOP\CleanClicks.lnk"
+  Delete "$SMPROGRAMS\CleanClicks\CleanClicks.lnk"
+  Delete "$SMPROGRAMS\CleanClicks\Uninstall CleanClicks.lnk"
+  RMDir  "$SMPROGRAMS\CleanClicks"
 
-    MessageBox MB_ICONINFORMATION "CleanClicks has been uninstalled successfully.$\r$\nThank you for using CleanClicks!"
+  ; ── Remove registry ───────────────────────────────────────
+  DeleteRegKey HKLM "${UNINSTKEY}"
+  DeleteRegKey HKLM "${REGKEY}"
 
 SectionEnd

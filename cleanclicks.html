@@ -1093,6 +1093,7 @@ body.dark .logo-text h3{color:#93c5fd}
     <button class="tab-btn" onclick="switchTab('shredder')">🔒 Shredder</button>
     <button class="tab-btn" onclick="switchTab('registry')">🛠 Registry</button>
     <button class="tab-btn" onclick="switchTab('monitor')">📊 Monitor</button>
+    <button class="tab-btn" onclick="switchTab('ram')">🧠 RAM</button>
   </div>
 
   <!-- ─── TAB: TEMP & CACHE ─────────────────────────────────── -->
@@ -1219,6 +1220,8 @@ body.dark .logo-text h3{color:#93c5fd}
           <button class="interval-btn" onclick="setInterval_(900)">15 min</button>
           <button class="interval-btn" onclick="setInterval_(1800)">30 min</button>
           <button class="interval-btn" onclick="setInterval_(3600)">1 hr</button>
+          <button class="interval-btn" onclick="setInterval_(10800)">3 hr</button>
+          <button class="interval-btn" onclick="setInterval_(18000)">5 hr</button>
         </div>
       </div>
 
@@ -1354,7 +1357,7 @@ const API = 'http://localhost:5050/api';
 let drives = [];
 let selectedDrive = 'C';
 let sessionFreed = 0;
-let acInterval = 300;
+let acInterval = 600;
 let acActive = true;
 let acLastClean = null;
 let countdownTimer = null;
@@ -1394,7 +1397,7 @@ async function api(path, opts={}) {
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  const panels=['temp','dupes','startup','large','privacy','autoclean','shredder','registry','monitor'];
+  const panels=['temp','dupes','startup','large','privacy','autoclean','shredder','registry','monitor','ram'];
   const idx = panels.indexOf(name);
   if (idx>=0) {
     document.querySelectorAll('.tab-btn')[idx].classList.add('active');
@@ -1403,6 +1406,8 @@ function switchTab(name) {
   if (name==='startup') loadStartup();
   if (name==='monitor') startMonitor();
   if (name==='autoclean') refreshAC();
+  if (name==='ram') { loadRamStatus(); startRamAutoRefresh(); }
+  else stopRamAutoRefresh();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1817,10 +1822,11 @@ async function refreshAC() {
     document.getElementById('acStatusLabel').textContent = acActive ? '⚡ Auto-Clean is active' : '⏸ Auto-Clean is paused';
 
     // Update interval buttons
-    document.querySelectorAll('.interval-btn').forEach(b=>b.classList.remove('active'));
-    const intervals=[300,600,900,1800,3600];
+    const acBtns=document.querySelectorAll('#intervalBtns .interval-btn');
+    acBtns.forEach(b=>b.classList.remove('active'));
+    const intervals=[300,600,900,1800,3600,10800,18000];
     const idx=intervals.indexOf(acInterval);
-    if (idx>=0) document.querySelectorAll('.interval-btn')[idx].classList.add('active');
+    if (idx>=0) acBtns[idx].classList.add('active');
 
     // Render log
     renderACLog(acHistory);
@@ -1877,7 +1883,7 @@ async function setInterval_(seconds) {
   // Only target the auto-clean interval buttons — not shredder buttons
   const btns = document.querySelectorAll('#intervalBtns .interval-btn');
   btns.forEach(b=>b.classList.remove('active'));
-  const intervals=[300,600,900,1800,3600];
+  const intervals=[300,600,900,1800,3600,10800,18000];
   const idx=intervals.indexOf(seconds);
   if (idx>=0 && btns[idx]) btns[idx].classList.add('active');
   // Reset countdown with new interval
@@ -2491,5 +2497,479 @@ setInterval(refreshAC, 30000);
 setInterval(drawTrend, 60000);
 setInterval(()=>{api('/drives').then(d=>{drives=d;renderDrives();renderStats();}).catch(()=>{})},60000);
 </script>
+<!-- ══════════════════════════════════════════════════════════════════════════
+     AUTO-UPDATER UI  —  Paste this block just before </body> in cleanclicks.html
+     ══════════════════════════════════════════════════════════════════════════ -->
+
+<!-- UPDATE POPUP OVERLAY -->
+<div id="updateOverlay" style="display:none">
+  <div id="updatePopup">
+    <div id="updatePopupInner">
+
+      <!-- Header -->
+      <div class="upd-header">
+        <div class="upd-bobo">🤖</div>
+        <div>
+          <div class="upd-title">Update Available!</div>
+          <div class="upd-subtitle">BoBo found a newer version of CleanClicks</div>
+        </div>
+        <button class="upd-close" onclick="dismissUpdate()" title="Remind me later">✕</button>
+      </div>
+
+      <!-- Version badge row -->
+      <div class="upd-versions">
+        <div class="upd-ver-box upd-old">
+          <div class="upd-ver-label">Current</div>
+          <div class="upd-ver-num" id="updCurrentVer">v3.2</div>
+        </div>
+        <div class="upd-arrow">→</div>
+        <div class="upd-ver-box upd-new">
+          <div class="upd-ver-label">Latest</div>
+          <div class="upd-ver-num" id="updLatestVer">v?.?</div>
+        </div>
+      </div>
+
+      <!-- Release notes -->
+      <div class="upd-notes-label">What's new:</div>
+      <div class="upd-notes" id="updNotes">Loading release notes…</div>
+
+      <!-- Buttons -->
+      <div class="upd-btns">
+        <button class="upd-btn-primary" id="updDownloadBtn" onclick="openDownload()">
+          ⬇ Download Update
+        </button>
+        <button class="upd-btn-secondary" onclick="dismissUpdate()">
+          ⏰ Remind me later
+        </button>
+      </div>
+
+      <!-- Footer note -->
+      <div class="upd-foot">
+        CleanClicks will not auto-install. You stay in control.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE BADGE (shown in nav when update available, popup is dismissed) -->
+<div id="updateBadge" style="display:none" onclick="showUpdatePopup()" title="Update available — click to view">
+  🔔 Update available
+</div>
+
+<!-- ── STYLES ──────────────────────────────────────────────────────────────── -->
+<style>
+/* Overlay */
+#updateOverlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  animation:upd-fade-in .25s ease;
+}
+@keyframes upd-fade-in{from{opacity:0}to{opacity:1}}
+
+/* Popup card */
+#updatePopup{
+  width:100%;max-width:460px;
+  margin:16px;
+  animation:upd-slide-up .3s ease;
+}
+@keyframes upd-slide-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+#updatePopupInner{
+  background:#1e293b;
+  border:1px solid rgba(249,115,22,.3);
+  border-radius:20px;
+  padding:28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(249,115,22,.1);
+}
+
+/* Header */
+.upd-header{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:22px;
+}
+.upd-bobo{
+  font-size:36px;
+  width:52px;height:52px;
+  background:rgba(249,115,22,.12);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  animation:upd-bobo-bounce .8s ease-in-out infinite alternate;
+}
+@keyframes upd-bobo-bounce{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+.upd-title{
+  font-family:'Baloo 2',cursive;
+  font-size:20px;font-weight:900;color:#fff;
+}
+.upd-subtitle{font-size:13px;color:rgba(255,255,255,.45);margin-top:2px}
+.upd-close{
+  margin-left:auto;
+  background:rgba(255,255,255,.06);border:none;
+  color:rgba(255,255,255,.4);
+  width:30px;height:30px;border-radius:8px;
+  font-size:14px;cursor:pointer;
+  transition:all .2s;flex-shrink:0;
+}
+.upd-close:hover{background:rgba(239,68,68,.15);color:#f87171}
+
+/* Version boxes */
+.upd-versions{
+  display:flex;align-items:center;justify-content:center;gap:14px;
+  margin-bottom:20px;
+  background:rgba(0,0,0,.2);
+  border-radius:12px;padding:16px;
+}
+.upd-ver-box{
+  flex:1;text-align:center;
+  background:rgba(255,255,255,.04);
+  border-radius:10px;padding:12px 8px;
+  border:1px solid rgba(255,255,255,.07);
+}
+.upd-ver-box.upd-new{
+  background:rgba(249,115,22,.1);
+  border-color:rgba(249,115,22,.3);
+}
+.upd-ver-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.4);margin-bottom:4px}
+.upd-ver-num{
+  font-family:'Baloo 2',cursive;
+  font-size:22px;font-weight:900;color:rgba(255,255,255,.6);
+}
+.upd-ver-box.upd-new .upd-ver-num{color:#f97316}
+.upd-arrow{font-size:22px;color:rgba(249,115,22,.5);font-weight:900}
+
+/* Release notes */
+.upd-notes-label{
+  font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:rgba(255,255,255,.35);
+  margin-bottom:8px;
+}
+.upd-notes{
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:14px;
+  font-size:13px;color:rgba(255,255,255,.6);
+  line-height:1.6;max-height:120px;overflow-y:auto;
+  margin-bottom:20px;
+  white-space:pre-wrap;
+  font-family:'Courier New',monospace;
+}
+.upd-notes::-webkit-scrollbar{width:4px}
+.upd-notes::-webkit-scrollbar-thumb{background:rgba(249,115,22,.4);border-radius:2px}
+
+/* Buttons */
+.upd-btns{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.upd-btn-primary{
+  flex:1;
+  background:#f97316;color:#fff;border:none;
+  font-family:'Baloo 2',cursive;font-size:15px;font-weight:800;
+  padding:13px 20px;border-radius:10px;cursor:pointer;
+  box-shadow:0 6px 20px rgba(249,115,22,.4);
+  transition:all .2s;
+}
+.upd-btn-primary:hover{background:#ea580c;transform:translateY(-2px);box-shadow:0 8px 25px rgba(249,115,22,.5)}
+.upd-btn-secondary{
+  flex:1;
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.1);
+  font-size:14px;font-weight:600;
+  padding:13px 16px;border-radius:10px;cursor:pointer;
+  transition:all .2s;
+}
+.upd-btn-secondary:hover{background:rgba(255,255,255,.1);color:#fff}
+
+/* Footer */
+.upd-foot{
+  text-align:center;font-size:12px;
+  color:rgba(255,255,255,.25);
+}
+
+/* Badge */
+#updateBadge{
+  position:fixed;bottom:20px;right:20px;z-index:999;
+  background:#f97316;color:#fff;
+  font-size:13px;font-weight:700;
+  padding:10px 16px;border-radius:100px;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(249,115,22,.5);
+  animation:badge-pulse 2.5s ease-in-out infinite;
+  transition:all .2s;
+}
+#updateBadge:hover{background:#ea580c;transform:translateY(-2px)}
+@keyframes badge-pulse{
+  0%,100%{box-shadow:0 4px 20px rgba(249,115,22,.5)}
+  50%{box-shadow:0 4px 30px rgba(249,115,22,.8), 0 0 0 6px rgba(249,115,22,.1)}
+}
+</style>
+
+<!-- ── JAVASCRIPT ──────────────────────────────────────────────────────────── -->
+<script>
+// ── Update state ─────────────────────────────────────────────────────────────
+let _updateDismissed   = false;
+let _updateAvailable   = false;
+let _updateDownloadURL = 'https://github.com/askduttasai-ui/CleanClicks/releases/latest';
+
+// ── Show/hide helpers ─────────────────────────────────────────────────────────
+function showUpdatePopup() {
+  document.getElementById('updateOverlay').style.display = 'flex';
+  document.getElementById('updateBadge').style.display   = 'none';
+}
+
+function hideUpdatePopup() {
+  document.getElementById('updateOverlay').style.display = 'none';
+}
+
+function dismissUpdate() {
+  _updateDismissed = true;
+  hideUpdatePopup();
+  // Show badge so user can still access it
+  if (_updateAvailable) {
+    document.getElementById('updateBadge').style.display = 'block';
+  }
+  // Tell backend to mark dismissed
+  fetch(`${API}/update/dismiss`, { method: 'POST' }).catch(() => {});
+}
+
+function openDownload() {
+  window.open(_updateDownloadURL, '_blank');
+}
+
+// ── Render the popup with data from API ───────────────────────────────────────
+function renderUpdatePopup(state) {
+  document.getElementById('updCurrentVer').textContent = 'v' + state.current_version;
+  document.getElementById('updLatestVer').textContent  = 'v' + state.latest_version;
+  document.getElementById('updNotes').textContent      = state.release_notes || 'No release notes provided.';
+  document.getElementById('updDownloadBtn').onclick    = openDownload;
+  _updateDownloadURL = state.download_url || _updateDownloadURL;
+}
+
+// ── Poll /api/update/status ───────────────────────────────────────────────────
+async function checkUpdateStatus() {
+  try {
+    const res   = await fetch(`${API}/update/status`);
+    if (!res.ok) return;
+    const state = await res.json();
+
+    if (state.status === 'update_available' && !_updateDismissed) {
+      _updateAvailable = true;
+      renderUpdatePopup(state);
+      showUpdatePopup();
+    } else if (state.status === 'update_available' && _updateDismissed) {
+      // already dismissed — just keep badge visible
+      document.getElementById('updateBadge').style.display = 'block';
+    }
+  } catch (e) {
+    // silently ignore — updater is non-critical
+  }
+}
+
+// ── On page load: check immediately, then every 60 seconds ───────────────────
+window.addEventListener('load', () => {
+  // Slight delay so main UI loads first
+  setTimeout(checkUpdateStatus, 3000);
+  setInterval(checkUpdateStatus, 60_000);
+});
+
+// Close popup if user clicks outside the card
+document.getElementById('updateOverlay')?.addEventListener('click', function(e) {
+  if (e.target === this) dismissUpdate();
+});
+</script>
+
+<!-- ─── TAB: RAM OPTIMIZER ─────────────────────────────────── -->
+<div class="tab-panel" id="panel-ram">
+  <div class="panel-card">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">🧠 RAM Optimizer</div>
+        <div class="panel-subtitle">Free up memory and keep your PC fast</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" id="ramOptBtn" onclick="runRamOptimize()">⚡ Optimize RAM</button>
+        <button class="btn-secondary" onclick="loadRamStatus()">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- Result banner -->
+    <div id="ramBanner" style="display:none;margin-bottom:14px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;border-left:4px solid #22c55e;background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:#166534"></div>
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:14px">
+      <div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:20px;margin-bottom:4px">🔴</div>
+        <div id="ramUsedVal" style="font-size:20px;font-weight:900;color:#ef4444">—</div>
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em">Used</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:20px;margin-bottom:4px">🟢</div>
+        <div id="ramFreeVal" style="font-size:20px;font-weight:900;color:#22c55e">—</div>
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em">Free</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:20px;margin-bottom:4px">💾</div>
+        <div id="ramTotalVal" style="font-size:20px;font-weight:900;color:#3b82f6">—</div>
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em">Total</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="font-size:20px;margin-bottom:4px">📊</div>
+        <div id="ramPctVal" style="font-size:20px;font-weight:900;color:#f97316">—</div>
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em">Usage</div>
+      </div>
+    </div>
+
+    <!-- Gauge bar -->
+    <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#475569;margin-bottom:8px">
+        <span>RAM Usage</span><span id="ramGaugeLbl">0%</span>
+      </div>
+      <div style="height:14px;background:#f1f5f9;border-radius:7px;overflow:hidden;margin-bottom:6px">
+        <div id="ramGaugeBar" style="height:100%;width:0%;border-radius:7px;background:#22c55e;transition:width .8s cubic-bezier(.4,0,.2,1)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#94a3b8">
+        <span id="ramGaugeUsed">0 GB used</span><span id="ramGaugeFree">0 GB free</span>
+      </div>
+    </div>
+
+    <!-- Processes + Trend grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div style="background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#334155">🏃 Top Memory Processes</span>
+          <span style="font-size:11px;color:#94a3b8">Hover to end process</span>
+        </div>
+        <div id="ramProcList" style="max-height:260px;overflow-y:auto">
+          <div style="padding:30px;text-align:center;color:#94a3b8;font-size:14px">Loading…</div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#334155">📈 RAM Trend (30 min)</span>
+          <span id="ramTrendTs" style="font-size:11px;color:#94a3b8"></span>
+        </div>
+        <canvas id="ramTrendChart" style="width:100%;display:block;padding:12px 14px 4px" height="180"></canvas>
+        <div style="padding:4px 16px 12px;font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px">
+          <span style="width:10px;height:10px;border-radius:50%;background:#f97316;display:inline-block"></span> Used %
+          <span style="margin-left:10px;width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span> Free GB
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips -->
+    <div style="background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+      <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:10px">💡 Tips</div>
+      <div id="ramTipsList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px">
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569">⚡ Click Optimize RAM to flush standby memory</div>
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569">🔄 Auto-refreshes every 30 seconds while open</div>
+        <div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569">⚠️ Only end processes you recognise</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.ram-proc-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #f8fafc;transition:background .15s;position:relative}
+.ram-proc-row:hover{background:#fafafa}
+.ram-proc-row:last-child{border-bottom:none}
+.ram-kill-btn{position:absolute;right:10px;background:rgba(239,68,68,.1);border:none;color:#ef4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;display:none;align-items:center;justify-content:center;transition:all .15s}
+.ram-proc-row:hover .ram-kill-btn{display:flex}
+.ram-kill-btn:hover{background:#ef4444;color:white}
+</style>
+
+<script>
+let ramTimer=null,ramTrend=[];
+async function loadRamStatus(){
+  try{
+    const data=await api('/ram/status');
+    document.getElementById('ramUsedVal').textContent=(data.ram_gb||0).toFixed(1)+' GB';
+    document.getElementById('ramFreeVal').textContent=(data.free_gb||0).toFixed(1)+' GB';
+    document.getElementById('ramTotalVal').textContent=(data.total_gb||0).toFixed(1)+' GB';
+    document.getElementById('ramPctVal').textContent=(data.ram?.pct||0)+'%';
+    const pct=data.ram?.pct||0;
+    document.getElementById('ramGaugeLbl').textContent=pct+'%';
+    document.getElementById('ramGaugeBar').style.width=Math.min(pct,100)+'%';
+    document.getElementById('ramGaugeBar').style.background=pct>=85?'#ef4444':pct>=65?'linear-gradient(90deg,#22c55e,#f97316)':'#22c55e';
+    document.getElementById('ramGaugeUsed').textContent=(data.ram_gb||0).toFixed(1)+' GB used';
+    document.getElementById('ramGaugeFree').textContent=(data.free_gb||0).toFixed(1)+' GB free';
+    renderRamProcs(data.processes||[]);
+    if(data.trend?.length){ramTrend=data.trend;drawRamTrend();}
+    document.getElementById('ramTrendTs').textContent=data.timestamp||'';
+    const tips=[];
+    if(pct>=85)tips.push('🚨 RAM critically high — click Optimize now!');
+    else if(pct>=65)tips.push('⚠️ RAM moderate — close unused apps');
+    else tips.push('✅ RAM usage is healthy');
+    if((data.total_gb||0)<8)tips.push('💡 Less than 8 GB — consider upgrading RAM');
+    tips.push('⚡ Optimize RAM flushes standby memory from all processes');
+    document.getElementById('ramTipsList').innerHTML=tips.map(t=>`<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;font-size:13px;color:#475569">${t}</div>`).join('');
+  }catch(e){console.error('RAM:',e);}
+}
+function renderRamProcs(procs){
+  const el=document.getElementById('ramProcList');
+  if(!procs.length){el.innerHTML='<div style="padding:30px;text-align:center;color:#94a3b8">No data</div>';return;}
+  const max=procs[0].memory||1;
+  el.innerHTML=procs.map((p,i)=>`
+    <div class="ram-proc-row">
+      <span style="width:20px;text-align:center;font-size:11px;font-weight:800;color:#94a3b8;flex-shrink:0">${i+1}</span>
+      <span style="flex:1;font-size:13px;font-weight:600;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.name}">${p.name}</span>
+      <div style="width:60px;flex-shrink:0"><div style="height:5px;background:#f1f5f9;border-radius:3px"><div style="height:100%;width:${Math.round(p.memory/max*100)}%;background:#f97316;border-radius:3px"></div></div></div>
+      <span style="width:54px;text-align:right;flex-shrink:0;font-size:12px;font-weight:700;color:#64748b;padding-right:${p.killable?'28px':'4px'}">${p.memory_mb} MB</span>
+      ${p.killable?`<button class="ram-kill-btn" onclick="ramKill(${p.pid},'${p.name.replace(/'/g,"\\'")}')">✕</button>`:''}
+    </div>`).join('');
+}
+function drawRamTrend(){
+  const canvas=document.getElementById('ramTrendChart');
+  if(!canvas||!ramTrend.length)return;
+  const W=canvas.offsetWidth||380,H=180;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const p={t:14,r:14,b:26,l:36},cw=W-p.l-p.r,ch=H-p.t-p.b;
+  ctx.strokeStyle='#f1f5f9';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=p.t+(ch/4)*i;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+cw,y);ctx.stroke();}
+  ctx.fillStyle='#94a3b8';ctx.font='10px sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=4;i++)ctx.fillText((100-i*25)+'%',p.l-4,p.t+(ch/4)*i+3);
+  ctx.textAlign='center';
+  const step=Math.max(1,Math.floor(ramTrend.length/5));
+  ramTrend.forEach((d,i)=>{if(i%step===0){const x=p.l+(i/Math.max(ramTrend.length-1,1))*cw;ctx.fillText(d.timestamp,x,H-4);}});
+  const line=(getV,color,fill)=>{
+    ctx.beginPath();
+    ramTrend.forEach((d,i)=>{const x=p.l+(i/Math.max(ramTrend.length-1,1))*cw,v=Math.min(Math.max(getV(d),0),100),y=p.t+ch-(v/100)*ch;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    if(fill){ctx.lineTo(p.l+cw,p.t+ch);ctx.lineTo(p.l,p.t+ch);ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.beginPath();ramTrend.forEach((d,i)=>{const x=p.l+(i/Math.max(ramTrend.length-1,1))*cw,v=Math.min(Math.max(getV(d),0),100),y=p.t+ch-(v/100)*ch;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});}
+    ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.stroke();
+  };
+  const mf=Math.max(...ramTrend.map(d=>d.free_gb||0),1);
+  line(d=>d.pct||0,'#f97316','rgba(249,115,22,.07)');
+  line(d=>((d.free_gb||0)/mf)*100,'#22c55e',null);
+}
+async function runRamOptimize(){
+  const btn=document.getElementById('ramOptBtn');
+  btn.disabled=true;btn.textContent='⏳ Optimizing…';
+  try{
+    const data=await api('/ram/optimize',{method:'POST'});
+    const b=document.getElementById('ramBanner');
+    if(data.success){
+      b.textContent=`✅ Done! ${data.freed_mb>=1?data.freed_mb+' MB freed':'Standby flushed'} — ${data.processes_emptied} processes emptied (${data.before_pct}% → ${data.after_pct}%)`;
+      b.style.cssText='display:block;margin-bottom:14px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;border-left:4px solid #22c55e;background:linear-gradient(135deg,#f0fdf4,#dcfce7);color:#166534';
+    }else{
+      b.textContent='⚠️ Partial optimization — run as Administrator for best results';
+      b.style.cssText='display:block;margin-bottom:14px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;border-left:4px solid #f59e0b;background:linear-gradient(135deg,#fffbeb,#fef3c7);color:#92400e';
+    }
+    setTimeout(loadRamStatus,1200);
+  }catch(e){console.error(e);}
+  finally{btn.disabled=false;btn.textContent='⚡ Optimize RAM';}
+}
+async function ramKill(pid,name){
+  if(!confirm(`End "${name}" (PID ${pid})?\n\nOnly do this if you know what it is.`))return;
+  try{
+    const data=await api('/ram/kill',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pid,name})});
+    if(data.success)setTimeout(loadRamStatus,800);
+    else alert('Could not end: '+data.message);
+  }catch(e){alert('Error: '+e.message);}
+}
+function startRamAutoRefresh(){if(!ramTimer)ramTimer=setInterval(loadRamStatus,30000);}
+function stopRamAutoRefresh(){if(ramTimer){clearInterval(ramTimer);ramTimer=null;}}
+</script>
+
 </body>
 </html>
