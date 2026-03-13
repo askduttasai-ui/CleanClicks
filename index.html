@@ -158,7 +158,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(255,255,255,.06);paddin
     <h1 class="hero-title">Your PC deserves<br/><span class="hl">CleanClicks</span></h1>
     <p class="hero-sub">The only free PC cleaner that runs 24/7 as a Windows Service. More powerful than CCleaner Pro — with zero ads and zero telemetry.</p>
     <div class="hero-btns">
-      <a href="javascript:void(0)" onclick="startDownload()" class="btn-primary">⬇ Download Free — v3.3</a>
+      <a href="https://github.com/askduttasai-ui/CleanClicks/releases/download/v3.3/CleanClicks_Setup.exe" class="btn-primary">⬇ Download Free — v3.3</a>
     </div>
     <div class="hero-stats">
       <div><div class="stat-val">10</div><div class="stat-label">Cleaning Tools</div></div>
@@ -345,7 +345,7 @@ footer{background:var(--dark2);border-top:1px solid rgba(255,255,255,.06);paddin
     <div class="dl-ver">v3.3 — Latest Release</div>
     <div class="dl-title">Ready to clean your PC?</div>
     <div class="dl-sub">One installer. No Python needed. No setup required. Double-click and you're done.</div>
-    <div><a href="javascript:void(0)" onclick="startDownload()" class="dl-btn">⬇ Download CleanClicks Free</a><p style="color:#94a3b8;font-size:13px;margin-top:10px;">Windows 10/11 · ~10 MB · No account needed · Installs in 2 minutes</p>
+    <div><a href="https://github.com/askduttasai-ui/CleanClicks/releases/download/v3.3/CleanClicks_Setup.exe" class="dl-btn" download="CleanClicks_Setup.exe">⬇ Download CleanClicks Free</a><p style="color:#94a3b8;font-size:13px;margin-top:10px;">Windows 10/11 · ~10 MB · No account needed · Installs in 2 minutes</p>
   <div style="margin-top:20px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;">
     <span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 16px;color:#cbd5e1;font-size:13px;">✅ Free forever</span>
     <span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 16px;color:#cbd5e1;font-size:13px;">✅ No account needed</span>
@@ -395,78 +395,6 @@ window.addEventListener('scroll',()=>{
 </script>
 
 
-
-
-<!-- Download Modal -->
-<div id="dl-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#0F1923;border:2px solid #FF9933;border-radius:20px;padding:44px 48px;max-width:480px;width:90%;text-align:center;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.6)">
-    <div style="font-size:56px;margin-bottom:10px;">🤖</div>
-    <h2 style="color:#FF9933;font-family:'Baloo 2',cursive;font-size:24px;margin:0 0 6px;">BoBo says: Downloading!</h2>
-    <p style="color:#94a3b8;font-size:14px;margin:0 0 28px;">Your download is starting automatically...<br>If nothing happens in 5 seconds, use the button below.</p>
-
-    <a id="direct-dl-btn"
-       href="https://github.com/askduttasai-ui/CleanClicks/releases/download/v3.3/CleanClicks_Setup.exe"
-       style="display:inline-block;background:#FF9933;color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;padding:14px 32px;border-radius:12px;text-decoration:none;margin-bottom:14px;width:100%;box-sizing:border-box;">
-      ⬇ Click here if download doesn't start
-    </a>
-
-    <br>
-    <a href="https://github.com/askduttasai-ui/CleanClicks/releases/tag/v3.3"
-       target="_blank"
-       style="display:inline-block;color:#64748b;font-size:13px;text-decoration:none;margin-bottom:20px;">
-      📦 Or view the full GitHub release page →
-    </a>
-
-    <div style="background:#1E293B;border-radius:10px;padding:14px;font-size:12px;color:#64748b;text-align:left;margin-bottom:20px;">
-      <b style="color:#94a3b8;">File:</b> CleanClicks_Setup.exe &nbsp;|&nbsp;
-      <b style="color:#94a3b8;">Size:</b> ~10 MB &nbsp;|&nbsp;
-      <b style="color:#94a3b8;">Version:</b> 3.3<br>
-      <b style="color:#94a3b8;">SHA256:</b> <span style="font-family:monospace;font-size:11px;word-break:break-all;">83c6e51020c519ae76...</span>
-    </div>
-
-    <button onclick="closeDlModal()"
-      style="background:transparent;border:1px solid #334155;color:#64748b;padding:8px 24px;border-radius:8px;cursor:pointer;font-size:13px;">
-      ✕ Close
-    </button>
-  </div>
-</div>
-
-<script>
-const DL_URL = "https://github.com/askduttasai-ui/CleanClicks/releases/download/v3.3/CleanClicks_Setup.exe";
-
-function startDownload() {
-  // Show modal
-  const modal = document.getElementById('dl-modal');
-  modal.style.display = 'flex';
-
-  // Trigger download via hidden iframe (avoids CORS issues with anchor clicks)
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.src = DL_URL;
-  document.body.appendChild(iframe);
-
-  // Fallback: also try anchor click after short delay
-  setTimeout(() => {
-    const a = document.createElement('a');
-    a.href = DL_URL;
-    a.download = 'CleanClicks_Setup.exe';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }, 800);
-}
-
-function closeDlModal() {
-  document.getElementById('dl-modal').style.display = 'none';
-}
-
-// Close modal if clicking outside
-document.addEventListener('click', function(e) {
-  const modal = document.getElementById('dl-modal');
-  if (e.target === modal) closeDlModal();
-});
-</script>
 
 </body>
 </html>
