@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CleanClicks — Smart PC Cleaner | Free Forever</title>
+<meta name="description" content="CleanClicks is a free Windows PC cleaner that runs 24/7 as a background service. More powerful than CCleaner. No ads. No telemetry. Meet BoBo!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --orange:#f97316;--orange-d:#ea580c;--orange-l:#fff7ed;
+  --yellow:#fbbf24;--dark:#0f172a;--dark2:#1e293b;--dark3:#334155;
+  --slate:#64748b;--light:#f8fafc;--white:#ffffff;
+  --green:#22c55e;--blue:#3b82f6;
+  --radius:16px;
+  --shadow:0 20px 60px rgba(15,23,42,.15);
+  --glow:0 0 40px rgba(249,115,22,.25);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--white);overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--dark2)}
+::-webkit-scrollbar-thumb{background:var(--orange);border-radius:3px}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6%;background:rgba(15,23,42,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(249,115,22,.12);transition:all .3s}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Baloo 2',cursive;font-size:20px;font-weight:900;color:var(--white);text-decoration:none}
+.nav-logo-icon{width:36px;height:36px;background:var(--orange);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:var(--glow)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;transition:all .2s}
+.nav-links a:hover{color:var(--white);background:rgba(249,115,22,.1)}
+.nav-gh{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.14)!important;color:rgba(255,255,255,.85)!important;font-weight:600!important;padding:8px 16px!important;border-radius:8px!important}
+.nav-gh:hover{background:rgba(249,115,22,.1)!important;border-color:rgba(249,115,22,.3)!important;color:var(--white)!important}
+.nav-cta{background:var(--orange)!important;color:var(--white)!important;font-weight:700!important;padding:9px 20px!important;box-shadow:var(--glow)}
+.nav-cta:hover{background:var(--orange-d)!important;transform:translateY(-1px)}
+#hero{min-height:100vh;display:flex;align-items:center;padding:120px 6% 80px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 70% 60% at 70% 40%,rgba(249,115,22,.1) 0%,transparent 60%),radial-gradient(ellipse 50% 70% at 15% 80%,rgba(251,191,36,.06) 0%,transparent 50%)}
+.hero-grid{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(249,115,22,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%)}
+.hero-content{position:relative;z-index:1;max-width:580px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);border-radius:100px;padding:6px 16px;font-size:13px;font-weight:600;color:var(--orange);margin-bottom:28px;animation:fade-up .6s ease both}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-family:'Baloo 2',cursive;font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:1.06;margin-bottom:20px;animation:fade-up .6s .1s ease both}
+.hero-title .hl{color:var(--orange);position:relative;display:inline-block}
+.hero-title .hl::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--orange),var(--yellow));border-radius:2px;animation:ul-grow .8s .6s ease both;transform-origin:left}
+@keyframes ul-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.hero-sub{font-size:18px;font-weight:400;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:36px;max-width:460px;animation:fade-up .6s .2s ease both}
+.hero-btns{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:48px;animation:fade-up .6s .3s ease both}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;background:var(--orange);color:var(--white);text-decoration:none;font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;padding:14px 28px;border-radius:12px;box-shadow:0 8px 30px rgba(249,115,22,.4);transition:all .25s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--orange-d);transform:translateY(-3px);box-shadow:0 14px 40px rgba(249,115,22,.5)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,.75);text-decoration:none;font-size:15px;font-weight:500;padding:13px 22px;border-radius:12px;border:1px solid rgba(255,255,255,.14);transition:all .25s}
+.btn-secondary:hover{border-color:rgba(249,115,22,.35);color:var(--white);background:rgba(249,115,22,.07)}
+.hero-stats{display:flex;gap:36px;flex-wrap:wrap;animation:fade-up .6s .4s ease both}
+.stat-val{font-family:'Baloo 2',cursive;font-size:24px;font-weight:900;color:var(--orange)}
+.stat-label{font-size:12px;font-weight:500;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.hero-robot{position:absolute;right:5%;top:50%;transform:translateY(-50%);z-index:1;animation:fade-up .8s .3s ease both,float 4s ease-in-out 1s infinite}
+@keyframes float{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 16px))}}
+.robot-glow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(20px);animation:glow-pulse 3s ease-in-out infinite}
+@keyframes glow-pulse{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.strip{background:rgba(249,115,22,.07);border-top:1px solid rgba(249,115,22,.12);border-bottom:1px solid rgba(249,115,22,.12);padding:14px 6%;display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap}
+.strip-item{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:rgba(255,255,255,.75)}
+.strip-dot{color:var(--orange)}
+section{padding:96px 6%;position:relative}
+.label{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange);margin-bottom:12px}
+.s-title{font-family:'Baloo 2',cursive;font-size:clamp(26px,3.8vw,46px);font-weight:900;line-height:1.1;margin-bottom:14px}
+.s-sub{font-size:17px;color:rgba(255,255,255,.55);max-width:500px;line-height:1.65;margin-bottom:52px}
+#features{background:var(--dark)}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:18px}
+.feat-card{background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:26px;transition:all .3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),var(--yellow));opacity:0;transition:opacity .3s}
+.feat-card:hover{border-color:rgba(249,115,22,.2);background:rgba(249,115,22,.04);transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:46px;height:46px;background:rgba(249,115,22,.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;transition:transform .3s}
+.feat-card:hover .feat-icon{transform:scale(1.1) rotate(-6deg)}
+.feat-name{font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;margin-bottom:7px}
+.feat-desc{font-size:14px;color:rgba(255,255,255,.5);line-height:1.6}
+.feat-tag{display:inline-block;margin-top:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--orange);background:rgba(249,115,22,.1);padding:2px 8px;border-radius:4px}
+#compare{background:var(--dark2)}
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid rgba(255,255,255,.07)}
+.cmp-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.cmp-tbl th{padding:14px 18px;text-align:left;font-family:'Baloo 2',cursive;font-weight:700;font-size:13px;background:rgba(255,255,255,.04);border-bottom:2px solid rgba(249,115,22,.15);white-space:nowrap;color:rgba(255,255,255,.45)}
+.cmp-tbl th.ours{color:var(--orange);background:rgba(249,115,22,.07);border-top:2px solid var(--orange)}
+.cmp-tbl td{padding:11px 18px;border-bottom:1px solid rgba(255,255,255,.05);color:rgba(255,255,255,.7);vertical-align:middle}
+.cmp-tbl td.ours{background:rgba(249,115,22,.04);font-weight:600;color:var(--white)}
+.cmp-tbl tr:last-child td{border-bottom:none}
+.cmp-tbl tr:hover td{background:rgba(255,255,255,.015)}
+.cmp-tbl tr:hover td.ours{background:rgba(249,115,22,.07)}
+.chk{color:var(--green);font-size:17px}.crs{color:rgba(255,255,255,.2);font-size:17px}
+.paid-badge{display:inline-block;background:rgba(239,68,68,.12);color:#f87171;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+.uniq-badge{display:inline-block;background:rgba(249,115,22,.12);color:var(--orange);font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+#security{background:var(--dark)}
+.sec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px;margin-bottom:32px}
+.sec-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:22px;transition:all .3s}
+.sec-card:hover{border-color:rgba(249,115,22,.18);background:rgba(249,115,22,.04)}
+.sec-num{font-family:'Baloo 2',cursive;font-size:26px;font-weight:900;color:var(--orange);opacity:.3;line-height:1;margin-bottom:8px}
+.sec-ttl{font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;margin-bottom:6px}
+.sec-dsc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.5}
+.sec-note{display:flex;align-items:center;gap:12px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:14px 18px;font-size:14px;color:rgba(255,255,255,.7)}
+#bobo{background:var(--dark2);display:flex;align-items:center;gap:72px;flex-wrap:wrap}
+.bobo-text{flex:1;min-width:280px}
+.bobo-visual{flex:1;min-width:260px;display:flex;justify-content:center}
+.bobo-card{background:linear-gradient(135deg,rgba(249,115,22,.08),rgba(251,191,36,.04));border:1px solid rgba(249,115,22,.18);border-radius:24px;padding:40px;text-align:center;position:relative;overflow:hidden}
+.bobo-float{animation:b-float 3.5s ease-in-out infinite}
+@keyframes b-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.bobo-say{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:var(--white);font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;padding:8px 18px;border-radius:100px;margin-top:18px;box-shadow:0 4px 20px rgba(249,115,22,.4);animation:say-pulse 3s ease-in-out infinite}
+@keyframes say-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+#download{background:linear-gradient(135deg,var(--dark2),var(--dark));text-align:center;padding:110px 6%}
+.dl-card{max-width:620px;margin:0 auto;background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.18);border-radius:24px;padding:52px 44px}
+.dl-ver{display:inline-block;background:rgba(249,115,22,.14);color:var(--orange);font-size:11px;font-weight:700;padding:4px 12px;border-radius:6px;margin-bottom:18px;text-transform:uppercase;letter-spacing:.08em}
+.dl-title{font-family:'Baloo 2',cursive;font-size:34px;font-weight:900;margin-bottom:10px}
+.dl-sub{font-size:16px;color:rgba(255,255,255,.5);margin-bottom:32px;line-height:1.6}
+.dl-btn{display:inline-flex;align-items:center;gap:12px;background:var(--orange);color:var(--white);text-decoration:none;font-family:'Baloo 2',cursive;font-size:18px;font-weight:900;padding:16px 38px;border-radius:14px;box-shadow:0 10px 40px rgba(249,115,22,.42);transition:all .25s;margin-bottom:26px}
+.dl-btn:hover{background:var(--orange-d);transform:translateY(-4px);box-shadow:0 16px 50px rgba(249,115,22,.55)}
+.dl-meta{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.35)}
+.dl-warn{margin-top:22px;padding-top:22px;border-top:1px solid rgba(255,255,255,.06);font-size:13px;color:rgba(255,255,255,.3);line-height:1.6}
+#opensource{background:var(--dark);text-align:center;padding:80px 6%}
+.gh-card{max-width:540px;margin:0 auto;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:38px}
+.gh-icon{font-size:46px;margin-bottom:14px}
+.gh-title{font-family:'Baloo 2',cursive;font-size:22px;font-weight:900;margin-bottom:8px}
+.gh-sub{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:26px;line-height:1.6}
+.gh-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--white);text-decoration:none;font-size:14px;font-weight:600;padding:11px 20px;border-radius:10px;transition:all .25s;margin:5px}
+.gh-btn:hover{background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.28)}
+footer{background:var(--dark2);border-top:1px solid rgba(255,255,255,.06);padding:36px 6%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+.f-logo{font-family:'Baloo 2',cursive;font-size:18px;font-weight:900;display:flex;align-items:center;gap:9px}
+.f-logo span{width:30px;height:30px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.f-links{display:flex;gap:18px;flex-wrap:wrap}
+.f-links a{font-size:13px;color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s}
+.f-links a:hover{color:var(--orange)}
+.f-copy{font-size:12px;color:rgba(255,255,255,.2);width:100%}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+@media(max-width:900px){.hero-robot{display:none}nav .nav-links a:not(.nav-cta){display:none}#bobo{flex-direction:column}}
+@media(max-width:580px){.dl-card{padding:32px 20px}.hero-stats{gap:18px}footer{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#" class="nav-logo"><div class="nav-logo-icon">🤖</div>CleanClicks</a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#compare">Compare</a>
+    <a href="#security">Security</a>
+    <a href="#bobo">Meet BoBo</a>
+    <a href="https://github.com/askduttasai-ui/CleanClicks" class="nav-gh" target="_blank">🐙 GitHub</a>
+    <a href="#download" class="nav-cta">⬇ Download Free</a>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> v3.3 — Free Forever</div>
+    <h1 class="hero-title">Your PC deserves<br/><span class="hl">CleanClicks</span></h1>
+    <p class="hero-sub">The only free PC cleaner that runs 24/7 as a Windows Service. More powerful than CCleaner Pro — with zero ads and zero telemetry.</p>
+    <div class="hero-btns">
+      <a href="javascript:void(0)" onclick="startDownload()" class="btn-primary">⬇ Download Free — v3.3</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-val">10</div><div class="stat-label">Cleaning Tools</div></div>
+      <div><div class="stat-val">7</div><div class="stat-label">Security Layers</div></div>
+      <div><div class="stat-val">0</div><div class="stat-label">Ads &amp; Telemetry</div></div>
+      <div><div class="stat-val">Free</div><div class="stat-label">Forever</div></div>
+    </div>
+  </div>
+  <div class="hero-robot">
+    <div class="robot-glow"></div>
+    <svg viewBox="0 0 160 200" width="250" height="312" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="72" cy="197" rx="36" ry="5" fill="rgba(0,0,0,.2)"/>
+      <rect x="90" y="128" width="62" height="36" rx="14" fill="#fbbf24"/><rect x="92" y="130" width="58" height="32" rx="12" fill="#f59e0b"/>
+      <rect x="108" y="134" width="28" height="18" rx="5" fill="#1e40af" opacity=".85"/>
+      <circle cx="116" cy="140" r="4" fill="#ef4444"/><circle cx="116" cy="140" r="2.2" fill="#fca5a5"/>
+      <circle cx="126" cy="140" r="4" fill="#22c55e"/><circle cx="126" cy="140" r="2.2" fill="#86efac"/>
+      <circle cx="121" cy="148" r="4" fill="#3b82f6"/><circle cx="121" cy="148" r="2.2" fill="#93c5fd"/>
+      <circle cx="102" cy="164" r="9" fill="#1e293b"/><circle cx="102" cy="164" r="5" fill="#374151"/><circle cx="102" cy="164" r="2" fill="#9ca3af"/>
+      <circle cx="136" cy="164" r="9" fill="#1e293b"/><circle cx="136" cy="164" r="5" fill="#374151"/><circle cx="136" cy="164" r="2" fill="#9ca3af"/>
+      <rect x="96" y="150" width="38" height="8" rx="3" fill="rgba(0,0,0,.2)"/>
+      <text x="115" y="157" text-anchor="middle" font-family="Baloo 2,cursive" font-size="5" font-weight="800" fill="#fef3c7">CLEAN-O</text>
+      <path d="M94,140 Q70,130 52,138" stroke="#6b7280" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M94,140 Q70,130 52,138" stroke="#9ca3af" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-dasharray="5,4"/>
+      <rect x="26" y="132" width="28" height="12" rx="5" fill="#374151"/><rect x="23" y="137" width="34" height="6" rx="3" fill="#1e293b"/>
+      <ellipse cx="40" cy="143" rx="14" ry="5" fill="rgba(59,130,246,.18)"/>
+      <rect x="44" y="136" width="16" height="36" rx="9" fill="#e2e8f0"/><rect x="38" y="166" width="24" height="10" rx="6" fill="#94a3b8"/>
+      <rect x="66" y="136" width="16" height="36" rx="9" fill="#e2e8f0"/><rect x="60" y="166" width="24" height="10" rx="6" fill="#94a3b8"/>
+      <rect x="30" y="82" width="68" height="58" rx="22" fill="white"/>
+      <ellipse cx="50" cy="90" rx="16" ry="7" fill="rgba(255,255,255,.5)"/>
+      <rect x="40" y="96" width="48" height="32" rx="10" fill="#eff6ff"/><rect x="40" y="96" width="48" height="32" rx="10" fill="none" stroke="#bfdbfe" stroke-width="1.2"/>
+      <circle cx="52" cy="106" r="5" fill="#22c55e"/><circle cx="52" cy="106" r="3" fill="#86efac"/>
+      <circle cx="64" cy="106" r="5" fill="#f97316"/><circle cx="64" cy="106" r="3" fill="#fdba74"/>
+      <circle cx="76" cy="106" r="5" fill="#3b82f6"/><circle cx="76" cy="106" r="3" fill="#93c5fd"/>
+      <rect x="40" y="116" width="48" height="10" rx="4" fill="#dbeafe"/>
+      <text x="64" y="124" text-anchor="middle" font-family="Baloo 2,cursive" font-size="6" font-weight="900" fill="#1e40af">CleanClicks</text>
+      <rect x="12" y="86" width="22" height="13" rx="7" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+      <rect x="10" y="96" width="13" height="22" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+      <circle cx="16" cy="120" r="9" fill="white" stroke="#e2e8f0" stroke-width="1.5"/><circle cx="16" cy="120" r="6" fill="#f1f5f9"/>
+      <rect x="94" y="86" width="22" height="13" rx="7" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+      <rect x="100" y="96" width="13" height="22" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+      <circle cx="109" cy="120" r="9" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+      <rect x="54" y="68" width="18" height="16" rx="6" fill="#cbd5e1"/><rect x="57" y="70" width="12" height="12" rx="4" fill="#e2e8f0"/>
+      <circle cx="63" cy="46" r="34" fill="white"/><circle cx="63" cy="46" r="34" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+      <ellipse cx="48" cy="26" rx="13" ry="8" fill="rgba(255,255,255,.55)"/>
+      <rect x="61" y="12" width="4" height="14" rx="2" fill="#94a3b8"/>
+      <circle cx="63" cy="11" r="7" fill="#f97316"/><circle cx="63" cy="11" r="4" fill="#fbbf24"/><circle cx="63" cy="11" r="9" fill="rgba(249,115,22,.15)"/>
+      <rect x="26" y="36" width="10" height="20" rx="5" fill="#e2e8f0"/><rect x="27" y="40" width="8" height="12" rx="3" fill="#3b82f6" opacity=".5"/>
+      <rect x="90" y="36" width="10" height="20" rx="5" fill="#e2e8f0"/><rect x="91" y="40" width="8" height="12" rx="3" fill="#3b82f6" opacity=".5"/>
+      <rect x="36" y="32" width="24" height="22" rx="10" fill="#0f172a"/><rect x="66" y="32" width="24" height="22" rx="10" fill="#0f172a"/>
+      <rect x="38" y="34" width="20" height="18" rx="8" fill="#0ea5e9"/><rect x="68" y="34" width="20" height="18" rx="8" fill="#38bdf8" opacity=".7"/>
+      <circle cx="48" cy="43" r="6" fill="#0c4a6e"/><circle cx="78" cy="43" r="6" fill="#0c4a6e"/>
+      <circle cx="44" cy="38" r="3.5" fill="white"/><circle cx="74" cy="38" r="3.5" fill="white"/>
+      <circle cx="50" cy="45" r="1.5" fill="rgba(255,255,255,.4)"/><circle cx="80" cy="45" r="1.5" fill="rgba(255,255,255,.4)"/>
+      <path d="M50,64 Q63,75 76,64" stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="50" cy="64" r="2.5" fill="#94a3b8"/><circle cx="76" cy="64" r="2.5" fill="#94a3b8"/>
+      <ellipse cx="34" cy="56" rx="8" ry="5" fill="rgba(249,115,22,.18)"/><ellipse cx="92" cy="56" rx="8" ry="5" fill="rgba(249,115,22,.18)"/>
+    </svg>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="strip-item"><span class="strip-dot">◆</span>Runs as Windows Service</div>
+  <div class="strip-item"><span class="strip-dot">◆</span>Auto-cleans every 5 min</div>
+  <div class="strip-item"><span class="strip-dot">◆</span>10 Powerful Tools</div>
+  <div class="strip-item"><span class="strip-dot">◆</span>Zero ads &amp; telemetry</div>
+  <div class="strip-item"><span class="strip-dot">◆</span>100% open source</div>
+  <div class="strip-item"><span class="strip-dot">◆</span>MIT License</div>
+  <div class="strip-item"><span class="strip-dot">◆</span>Free forever</div>
+</div>
+
+<section id="features">
+  <div class="label">Features</div>
+  <h2 class="s-title reveal">Everything your PC needs.<br/>Nothing you don't.</h2>
+  <p class="s-sub reveal d1">10 powerful cleaning tools in one beautiful app — each one runs silently in the background.</p>
+  <div class="feat-grid">
+    <div class="feat-card reveal"><div class="feat-icon">🗑️</div><div class="feat-name">Temp &amp; Cache Cleaner</div><div class="feat-desc">Windows Temp, browser cache, log files, Windows Update cache, Python cache, thumbnails — all cleared instantly.</div><span class="feat-tag">Core</span></div>
+    <div class="feat-card reveal d1"><div class="feat-icon">📋</div><div class="feat-name">Duplicate File Finder</div><div class="feat-desc">SHA-256 hashing finds truly identical files by content — not just name. Always keeps your original safe.</div><span class="feat-tag">Smart</span></div>
+    <div class="feat-card reveal d2"><div class="feat-icon">⚡</div><div class="feat-name">Auto-Clean Engine</div><div class="feat-desc">Set it and forget it. Cleans every 5, 10, 15, 30 min or 1 hour. Runs as Windows Service — even when browser is closed.</div><span class="feat-tag">Unique</span></div>
+    <div class="feat-card reveal"><div class="feat-icon">🚀</div><div class="feat-name">Startup Manager</div><div class="feat-desc">Lists all boot programs from Windows Registry. Toggle to speed up startup. Entries backed up — re-enable anytime.</div><span class="feat-tag">Core</span></div>
+    <div class="feat-card reveal d1"><div class="feat-icon">🔍</div><div class="feat-name">Large File Finder</div><div class="feat-desc">Filter by 50MB, 100MB, 500MB or 1GB. Categorised by type: video, archives, installers.</div><span class="feat-tag">Core</span></div>
+    <div class="feat-card reveal d2"><div class="feat-icon">🩺</div><div class="feat-name">PC Health Score A–F</div><div class="feat-desc">Unique to CleanClicks. 5-dimension scoring: Disk, Temp, Startup, Cache, Activity. Know your PC's real health.</div><span class="feat-tag">Unique</span></div>
+    <div class="feat-card reveal"><div class="feat-icon">🔒</div><div class="feat-name">Secure File Shredder</div><div class="feat-desc">1-Pass, DoD 3-Pass, or Gutmann 7-Pass. Files unrecoverable even with forensic tools. Free — unlike CCleaner.</div><span class="feat-tag">Premium Free</span></div>
+    <div class="feat-card reveal d1"><div class="feat-icon">🛠️</div><div class="feat-name">Registry Cleaner</div><div class="feat-desc">Safely removes broken uninstall entries, invalid startup items, dead file associations. Only removes what's provably broken.</div><span class="feat-tag">Core</span></div>
+    <div class="feat-card reveal d2"><div class="feat-icon">📊</div><div class="feat-name">Live System Monitor</div><div class="feat-desc">Real-time CPU, RAM, drive usage, top 8 memory processes. Updates every 3 seconds.</div><span class="feat-tag">Core</span></div>
+    <div class="feat-card reveal"><div class="feat-icon">💾</div><div class="feat-name">RAM Optimizer</div><div class="feat-desc">Live RAM stats, one-click memory optimization, and process killer. Free up RAM instantly without restarting your PC.</div><span class="feat-tag">New in v3.3</span></div>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="label">Compare</div>
+  <h2 class="s-title reveal">Better than competition.<br/>Costs nothing.</h2>
+  <p class="s-sub reveal d1">CleanClicks does everything CCleaner charges for — and more. Free. Forever.</p>
+  <div class="tbl-wrap reveal">
+    <table class="cmp-tbl">
+      <thead><tr>
+        <th>Feature</th><th>CCleaner Free</th><th>Glary Free</th><th class="ours">✨ CleanClicks</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Temp &amp; Cache Cleaner</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td class="ours"><span class="chk">✓</span></td></tr>
+        <tr><td>Duplicate Finder</td><td><span class="crs">✗</span></td><td><span class="chk">✓</span></td><td class="ours"><span class="chk">✓</span></td></tr>
+        <tr><td>Startup Manager</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td class="ours"><span class="chk">✓</span></td></tr>
+        <tr><td>Privacy Cleaner</td><td><span class="chk">✓</span></td><td><span class="chk">✓</span></td><td class="ours"><span class="chk">✓</span></td></tr>
+        <tr><td>Secure File Shredder</td><td><span class="paid-badge">Paid</span></td><td><span class="chk">✓</span></td><td class="ours"><span class="chk">✓</span> Free</td></tr>
+        <tr><td>RAM Optimizer</td><td><span class="paid-badge">Paid</span></td><td><span class="chk">✓</span></td><td class="ours"><span class="uniq-badge">New v3.3</span> Free</td></tr>
+        <tr><td>Auto-Clean Background</td><td><span class="paid-badge">Paid</span></td><td><span class="crs">✗</span></td><td class="ours"><span class="uniq-badge">Unique</span> Free</td></tr>
+        <tr><td>Runs as Windows Service</td><td><span class="crs">✗</span></td><td><span class="crs">✗</span></td><td class="ours"><span class="uniq-badge">Unique</span></td></tr>
+        <tr><td>PC Health Score A–F</td><td><span class="crs">✗</span></td><td><span class="crs">✗</span></td><td class="ours"><span class="uniq-badge">Unique</span></td></tr>
+        <tr><td>Disk Trend Chart</td><td><span class="crs">✗</span></td><td><span class="crs">✗</span></td><td class="ours"><span class="uniq-badge">Unique</span></td></tr>
+        <tr><td>7-Layer Security</td><td><span class="crs">✗</span></td><td><span class="crs">✗</span></td><td class="ours"><span class="uniq-badge">Unique</span></td></tr>
+        <tr><td>Zero Ads / Telemetry</td><td><span class="crs">✗</span> (Avast)</td><td><span class="crs">✗</span></td><td class="ours"><span class="chk">✓</span> Always</td></tr>
+        <tr><td>Open Source</td><td><span class="crs">✗</span></td><td><span class="crs">✗</span></td><td class="ours"><span class="chk">✓</span> MIT</td></tr>
+        <tr><td style="font-weight:700">Price</td><td>Free / Paid</td><td>Free / Paid</td><td class="ours" style="color:var(--orange);font-weight:900;font-family:'Baloo 2',cursive">FREE FOREVER</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="security">
+  <div class="label">Security</div>
+  <h2 class="s-title reveal">Built to be trusted.</h2>
+  <p class="s-sub reveal d1">7 protection layers. CleanClicks never touches the internet after install.</p>
+  <div class="sec-grid">
+    <div class="sec-card reveal"><div class="sec-num">01</div><div class="sec-ttl">Localhost-Only API</div><div class="sec-dsc">All requests from external IPs blocked with HTTP 403. No hacker can reach your API.</div></div>
+    <div class="sec-card reveal d1"><div class="sec-num">02</div><div class="sec-ttl">Security Headers</div><div class="sec-dsc">XSS, clickjacking, MIME sniffing protection on every response. CSP enforced.</div></div>
+    <div class="sec-card reveal d2"><div class="sec-num">03</div><div class="sec-ttl">CORS Locked</div><div class="sec-dsc">Only localhost:5050 can call the API. All other origins permanently blocked.</div></div>
+    <div class="sec-card reveal"><div class="sec-num">04</div><div class="sec-ttl">SHA-256 Integrity</div><div class="sec-dsc">Checks its own file hash on every startup. Warns immediately if tampered with.</div></div>
+    <div class="sec-card reveal d1"><div class="sec-num">05</div><div class="sec-ttl">Session Tokens</div><div class="sec-dsc">256-bit random token generated fresh every startup. Expires when app closes.</div></div>
+    <div class="sec-card reveal d2"><div class="sec-num">06</div><div class="sec-ttl">Zero Internet</div><div class="sec-dsc">No telemetry, analytics, update checks, or cloud sync. Everything stays on your machine.</div></div>
+    <div class="sec-card reveal"><div class="sec-num">07</div><div class="sec-ttl">Open Source</div><div class="sec-dsc">Every line of code publicly auditable on GitHub. Nothing hidden. Nothing to hide.</div></div>
+  </div>
+  <div class="sec-note reveal"><span>🔍</span><span>CleanClicks never reads the <strong>content</strong> of your files — only paths, sizes, and dates. Your documents and photos are never accessed.</span></div>
+</section>
+
+<section id="bobo">
+  <div class="bobo-text">
+    <div class="label">Meet BoBo</div>
+    <h2 class="s-title reveal">Your PC's new<br/>best friend.</h2>
+    <p class="s-sub reveal d1" style="margin-bottom:24px">BoBo is CleanClicks' friendly robot mascot. He walks around your screen — vacuum in hand — sucking up digital dust and junk. After every clean he slides to the right side of the screen and says:</p>
+    <div class="bobo-say reveal d2">✅ Done with cleaning!</div>
+    <p style="font-size:14px;color:rgba(255,255,255,.35);margin-top:18px" class="reveal d3">Pure CSS/JS animation — zero performance impact on your PC.</p>
+  </div>
+  <div class="bobo-visual reveal">
+    <div class="bobo-card">
+      <div class="bobo-float">
+        <svg viewBox="0 0 160 200" width="190" height="238" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="72" cy="197" rx="36" ry="5" fill="rgba(0,0,0,.18)"/>
+          <rect x="90" y="128" width="62" height="36" rx="14" fill="#fbbf24"/><rect x="92" y="130" width="58" height="32" rx="12" fill="#f59e0b"/>
+          <rect x="108" y="134" width="28" height="18" rx="5" fill="#1e40af" opacity=".85"/>
+          <circle cx="116" cy="140" r="4" fill="#ef4444"/><circle cx="126" cy="140" r="4" fill="#22c55e"/><circle cx="121" cy="148" r="4" fill="#3b82f6"/>
+          <circle cx="102" cy="164" r="9" fill="#1e293b"/><circle cx="136" cy="164" r="9" fill="#1e293b"/>
+          <path d="M94,140 Q70,130 52,138" stroke="#6b7280" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M94,140 Q70,130 52,138" stroke="#9ca3af" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-dasharray="5,4"/>
+          <rect x="26" y="132" width="28" height="12" rx="5" fill="#374151"/>
+          <rect x="44" y="136" width="16" height="36" rx="9" fill="#e2e8f0"/><rect x="38" y="166" width="24" height="10" rx="6" fill="#94a3b8"/>
+          <rect x="66" y="136" width="16" height="36" rx="9" fill="#e2e8f0"/><rect x="60" y="166" width="24" height="10" rx="6" fill="#94a3b8"/>
+          <rect x="30" y="82" width="68" height="58" rx="22" fill="white"/>
+          <rect x="40" y="96" width="48" height="32" rx="10" fill="#eff6ff"/>
+          <circle cx="52" cy="106" r="5" fill="#22c55e"/><circle cx="64" cy="106" r="5" fill="#f97316"/><circle cx="76" cy="106" r="5" fill="#3b82f6"/>
+          <rect x="12" y="86" width="22" height="13" rx="7" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+          <circle cx="16" cy="120" r="9" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+          <rect x="94" y="86" width="22" height="13" rx="7" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+          <circle cx="109" cy="120" r="9" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+          <rect x="54" y="68" width="18" height="16" rx="6" fill="#cbd5e1"/>
+          <circle cx="63" cy="46" r="34" fill="white"/>
+          <rect x="61" y="12" width="4" height="14" rx="2" fill="#94a3b8"/>
+          <circle cx="63" cy="11" r="7" fill="#f97316"/><circle cx="63" cy="11" r="4" fill="#fbbf24"/>
+          <rect x="26" y="36" width="10" height="20" rx="5" fill="#e2e8f0"/><rect x="90" y="36" width="10" height="20" rx="5" fill="#e2e8f0"/>
+          <rect x="36" y="32" width="24" height="22" rx="10" fill="#0f172a"/><rect x="66" y="32" width="24" height="22" rx="10" fill="#0f172a"/>
+          <rect x="38" y="34" width="20" height="18" rx="8" fill="#38bdf8"/><rect x="68" y="34" width="20" height="18" rx="8" fill="#38bdf8"/>
+          <circle cx="48" cy="43" r="6" fill="#0c4a6e"/><circle cx="78" cy="43" r="6" fill="#0c4a6e"/>
+          <circle cx="44" cy="38" r="3.5" fill="white"/><circle cx="74" cy="38" r="3.5" fill="white"/>
+          <path d="M50,64 Q63,75 76,64" stroke="#94a3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <ellipse cx="34" cy="56" rx="8" ry="5" fill="rgba(249,115,22,.18)"/><ellipse cx="92" cy="56" rx="8" ry="5" fill="rgba(249,115,22,.18)"/>
+        </svg>
+      </div>
+      <div class="bobo-say">✅ Done with cleaning!</div>
+      <p style="font-size:12px;color:rgba(255,255,255,.3);margin-top:12px">Lives in the background of the CleanClicks app</p>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="dl-card reveal">
+    <div class="dl-ver">v3.3 — Latest Release</div>
+    <div class="dl-title">Ready to clean your PC?</div>
+    <div class="dl-sub">One installer. No Python needed. No setup required. Double-click and you're done.</div>
+    <div><a href="javascript:void(0)" onclick="startDownload()" class="dl-btn">⬇ Download CleanClicks Free</a><p style="color:#94a3b8;font-size:13px;margin-top:10px;">Windows 10/11 · ~10 MB · No account needed · Installs in 2 minutes</p>
+  <div style="margin-top:20px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+    <span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 16px;color:#cbd5e1;font-size:13px;">✅ Free forever</span>
+    <span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 16px;color:#cbd5e1;font-size:13px;">✅ No account needed</span>
+    <span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 16px;color:#cbd5e1;font-size:13px;">✅ Windows 10 / 11</span>
+    <span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 16px;color:#cbd5e1;font-size:13px;">✅ ~10 MB installer</span>
+  </div>
+</div>
+    <div class="dl-meta">
+      <span>🪟 Windows 10/11</span><span>📦 ~12 MB</span><span>🔒 No malware</span><span>🆓 Free forever</span><span>📖 MIT License</span>
+    </div>
+    <div class="dl-warn">⚠ Windows may show "Unknown Publisher" — click <strong>More info → Run anyway</strong>.<br/>CleanClicks is 100% open source. Every line of code is auditable on GitHub.</div>
+  </div>
+</section>
+
+<section id="opensource">
+  <div class="gh-card reveal">
+    <div class="gh-icon">🐙</div>
+    <div class="gh-title">Open Source &amp; Transparent</div>
+    <div class="gh-sub">Every line of CleanClicks is publicly auditable. No hidden code, no telemetry, no surprises. Built with Python, Flask, and pure HTML by AK CleanClicks.</div>
+    <div>
+      <a href="https://github.com/askduttasai-ui/CleanClicks" class="gh-btn">🐙 View Source</a>
+      <a href="https://github.com/askduttasai-ui/CleanClicks/releases" class="gh-btn">📦 All Releases</a>
+      <a href="https://github.com/askduttasai-ui/CleanClicks/issues" class="gh-btn">🐛 Report Bug</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo"><span>🤖</span>CleanClicks</div>
+  <div class="f-links">
+    <a href="#features">Features</a><a href="#compare">Compare</a><a href="#security">Security</a>
+    <a href="#download">Download</a><a href="https://github.com/askduttasai-ui/CleanClicks">GitHub</a>
+  </div>
+  <div class="f-copy">© 2026 AK CleanClicks — MIT License — Free Forever — cleanclicks.netlify.app</div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+window.addEventListener('scroll',()=>{
+  const nav = document.getElementById('nav');
+  nav.style.background = window.scrollY > 50 ? 'rgba(15,23,42,.97)' : 'rgba(15,23,42,.88)';
+  nav.style.boxShadow  = window.scrollY > 50 ? '0 4px 30px rgba(0,0,0,.3)' : 'none';
+});
+</script>
+
+
+
+
+<!-- Download Modal -->
+<div id="dl-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#0F1923;border:2px solid #FF9933;border-radius:20px;padding:44px 48px;max-width:480px;width:90%;text-align:center;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.6)">
+    <div style="font-size:56px;margin-bottom:10px;">🤖</div>
+    <h2 style="color:#FF9933;font-family:'Baloo 2',cursive;font-size:24px;margin:0 0 6px;">BoBo says: Downloading!</h2>
+    <p style="color:#94a3b8;font-size:14px;margin:0 0 28px;">Your download is starting automatically...<br>If nothing happens in 5 seconds, use the button below.</p>
+
+    <a id="direct-dl-btn"
+       href="https://github.com/askduttasai-ui/CleanClicks/releases/download/v3.3/CleanClicks_Setup.exe"
+       style="display:inline-block;background:#FF9933;color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;padding:14px 32px;border-radius:12px;text-decoration:none;margin-bottom:14px;width:100%;box-sizing:border-box;">
+      ⬇ Click here if download doesn't start
+    </a>
+
+    <br>
+    <a href="https://github.com/askduttasai-ui/CleanClicks/releases/tag/v3.3"
+       target="_blank"
+       style="display:inline-block;color:#64748b;font-size:13px;text-decoration:none;margin-bottom:20px;">
+      📦 Or view the full GitHub release page →
+    </a>
+
+    <div style="background:#1E293B;border-radius:10px;padding:14px;font-size:12px;color:#64748b;text-align:left;margin-bottom:20px;">
+      <b style="color:#94a3b8;">File:</b> CleanClicks_Setup.exe &nbsp;|&nbsp;
+      <b style="color:#94a3b8;">Size:</b> ~10 MB &nbsp;|&nbsp;
+      <b style="color:#94a3b8;">Version:</b> 3.3<br>
+      <b style="color:#94a3b8;">SHA256:</b> <span style="font-family:monospace;font-size:11px;word-break:break-all;">83c6e51020c519ae76...</span>
+    </div>
+
+    <button onclick="closeDlModal()"
+      style="background:transparent;border:1px solid #334155;color:#64748b;padding:8px 24px;border-radius:8px;cursor:pointer;font-size:13px;">
+      ✕ Close
+    </button>
+  </div>
+</div>
+
+<script>
+const DL_URL = "https://github.com/askduttasai-ui/CleanClicks/releases/download/v3.3/CleanClicks_Setup.exe";
+
+function startDownload() {
+  // Show modal
+  const modal = document.getElementById('dl-modal');
+  modal.style.display = 'flex';
+
+  // Trigger download via hidden iframe (avoids CORS issues with anchor clicks)
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = DL_URL;
+  document.body.appendChild(iframe);
+
+  // Fallback: also try anchor click after short delay
+  setTimeout(() => {
+    const a = document.createElement('a');
+    a.href = DL_URL;
+    a.download = 'CleanClicks_Setup.exe';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, 800);
+}
+
+function closeDlModal() {
+  document.getElementById('dl-modal').style.display = 'none';
+}
+
+// Close modal if clicking outside
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('dl-modal');
+  if (e.target === modal) closeDlModal();
+});
+</script>
+
+</body>
+</html>
